@@ -6,9 +6,9 @@ export default function AdminAccountsPage() {
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-4 px-6 py-12">
       <header className="space-y-1">
-        <h1 className="text-xl font-semibold">帳號與登入碼</h1>
+        <h1 className="text-xl font-semibold">帳號與登入 ID</h1>
         <p className="text-sm text-slate-600 dark:text-slate-400">
-          支援單筆新增、批次匯入以及登入碼寄送狀態追蹤。
+          支援單筆新增、批次匯入登入 ID，快速授權夥伴登入。
         </p>
       </header>
 
@@ -18,10 +18,10 @@ export default function AdminAccountsPage() {
           批次匯入
         </div>
         <p className="text-sm text-slate-600 dark:text-slate-400">
-          上傳 CSV 檔案後，系統會透過 Supabase Edge Function 建立帳號並寄送一次性登入碼。
+          上傳 CSV 檔案後，系統會透過 Supabase Edge Function 建立帳號並同步登入 ID。
         </p>
         <div className="rounded-2xl border border-dashed border-slate-300 p-4 text-xs text-slate-500 dark:border-slate-700 dark:text-slate-400">
-          CSV 欄位範例：name, email, role, grade, initial_credits
+          CSV 欄位範例：login_id, name, email, role, grade, initial_credits
         </div>
       </Card>
 
@@ -34,6 +34,14 @@ export default function AdminAccountsPage() {
           立即為新進夥伴建立帳號並同步寄送無密碼登入碼。
         </p>
         <form className="grid gap-3 text-sm sm:grid-cols-2">
+          <label className="space-y-1">
+            <span className="font-medium">登入 ID</span>
+            <input
+              type="text"
+              placeholder="LW123"
+              className="w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm uppercase outline-none transition focus:border-slate-400 focus:ring-1 focus:ring-slate-400 dark:border-slate-700 dark:bg-slate-900"
+            />
+          </label>
           <label className="space-y-1">
             <span className="font-medium">姓名</span>
             <input
@@ -80,10 +88,13 @@ export default function AdminAccountsPage() {
           </label>
           <div className="sm:col-span-2">
             <Button type="submit" className="w-full sm:w-auto">
-              建立帳號並寄送登入碼
+              建立帳號並立即開通
             </Button>
           </div>
         </form>
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            預設管理員登入 ID：<span className="font-semibold">LW888</span>
+          </p>
       </Card>
     </div>
   );

@@ -6,6 +6,7 @@ export interface Database {
       profiles: {
         Row: {
           id: string;
+          login_id: string;
           email: string;
           name: string;
           role: "ADMIN" | "MANAGER" | "STAFF";
@@ -15,6 +16,7 @@ export interface Database {
         };
         Insert: {
           id: string;
+          login_id: string;
           email: string;
           name: string;
           role?: "ADMIN" | "MANAGER" | "STAFF";
@@ -23,6 +25,7 @@ export interface Database {
           created_at?: string;
         };
         Update: {
+          login_id?: string;
           email?: string;
           name?: string;
           role?: "ADMIN" | "MANAGER" | "STAFF";
