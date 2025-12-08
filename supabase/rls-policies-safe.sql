@@ -48,6 +48,30 @@ DROP POLICY IF EXISTS "Users can read own ai feedback" ON ai_feedback;
 DROP POLICY IF EXISTS "Admins can manage ai feedback" ON ai_feedback;
 
 -- ============================================
+-- 建立安全函數（避免 RLS 遞迴）
+-- ============================================
+
+-- 建立安全函數來檢查是否為管理員（避免遞迴）
+CREATE OR REPLACE FUNCTION is_admin_user()
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  user_role TEXT;
+BEGIN
+  -- 直接查詢，使用 security definer 避免 RLS 限制
+  SELECT role INTO user_role
+  FROM employees
+  WHERE auth_user_id = auth.uid()
+  LIMIT 1;
+  
+  RETURN user_role IN ('manager', 'owner');
+END;
+$$;
+
+-- ============================================
 -- 建立新政策
 -- ============================================
 
@@ -60,38 +84,20 @@ CREATE POLICY "Users can read own employee data"
 ON employees FOR SELECT
 USING (auth.uid() = auth_user_id);
 
--- 允許管理員讀取所有員工資料
+-- 允許管理員讀取所有員工資料（使用函數避免遞迴）
 CREATE POLICY "Admins can read all employees"
 ON employees FOR SELECT
-USING (
-  EXISTS (
-    SELECT 1 FROM employees
-    WHERE auth_user_id = auth.uid()
-    AND role IN ('manager', 'owner')
-  )
-);
+USING (is_admin_user());
 
 -- 允許管理員建立員工資料（通常由後台手動建立）
 CREATE POLICY "Admins can insert employees"
 ON employees FOR INSERT
-WITH CHECK (
-  EXISTS (
-    SELECT 1 FROM employees
-    WHERE auth_user_id = auth.uid()
-    AND role IN ('manager', 'owner')
-  )
-);
+WITH CHECK (is_admin_user());
 
 -- 允許管理員更新員工資料
 CREATE POLICY "Admins can update employees"
 ON employees FOR UPDATE
-USING (
-  EXISTS (
-    SELECT 1 FROM employees
-    WHERE auth_user_id = auth.uid()
-    AND role IN ('manager', 'owner')
-  )
-);
+USING (is_admin_user());
 
 -- ============================================
 -- evaluation_sessions 表的政策
