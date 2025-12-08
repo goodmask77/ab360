@@ -117,11 +117,22 @@ export default function AdminPage() {
               </Link>
               <Link
                 href="/admin/debug-tools"
-                className="bg-gradient-to-r from-purple-500 to-pink-600 text-white text-center py-3 px-4 rounded-xl hover:shadow-lg transition-all font-medium"
+                className="bg-gradient-to-r from-purple-500 to-pink-600 text-white text-center py-3 px-4 rounded-xl hover:shadow-lg transition-all font-medium flex items-center justify-center gap-1"
               >
-                🔧 測試工具
+                <span>🔧</span>
+                <span>測試工具</span>
+                <span className="text-xs opacity-75">(生成數據)</span>
               </Link>
             </div>
+            
+            {/* 權限提示 */}
+            {!isAdmin && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+                <p className="text-sm text-yellow-800">
+                  ⚠️ 您目前沒有管理員權限。如需訪問測試工具，請聯繫系統管理員將您的帳號設為 <code className="bg-yellow-100 px-1 rounded">manager</code> 或 <code className="bg-yellow-100 px-1 rounded">owner</code>。
+                </p>
+              </div>
+            )}
 
             {/* 場次列表 */}
             {sessions.length === 0 ? (

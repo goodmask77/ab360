@@ -104,8 +104,36 @@ export default function DebugToolsPage() {
   if (!isAdmin) {
     return (
       <MobileLayout title="測試工具">
-        <div className="bg-white rounded-xl p-8 text-center border border-gray-200">
-          <p className="text-gray-500">您沒有權限訪問此頁面</p>
+        <div className="bg-white rounded-xl p-8 border border-gray-200 space-y-4">
+          <div className="text-center">
+            <div className="text-4xl mb-4">🔒</div>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">需要管理員權限</h2>
+            <p className="text-gray-600 mb-4">您目前沒有權限訪問此頁面</p>
+          </div>
+          
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <h3 className="font-semibold text-yellow-900 mb-2">如何獲得權限？</h3>
+            <ol className="text-sm text-yellow-800 space-y-2 list-decimal list-inside">
+              <li>確保您的帳號在 <code className="bg-yellow-100 px-1 rounded">employees</code> 表中有對應記錄</li>
+              <li>將您的 <code className="bg-yellow-100 px-1 rounded">role</code> 欄位設為 <code className="bg-yellow-100 px-1 rounded">manager</code> 或 <code className="bg-yellow-100 px-1 rounded">owner</code></li>
+              <li>重新登入系統</li>
+            </ol>
+          </div>
+          
+          <div className="flex gap-3">
+            <button
+              onClick={() => router.push("/admin")}
+              className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors"
+            >
+              返回管理後台
+            </button>
+            <button
+              onClick={() => router.push("/home")}
+              className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              返回首頁
+            </button>
+          </div>
         </div>
       </MobileLayout>
     );
