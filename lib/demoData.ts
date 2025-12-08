@@ -111,3 +111,4 @@ export function generateRandomCategory(): string {
   return categories[Math.floor(Math.random() * categories.length)];
 }
 
+

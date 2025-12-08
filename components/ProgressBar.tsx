@@ -37,3 +37,4 @@ export default function ProgressBar({ current, total, label }: ProgressBarProps)
   );
 }
 
+
