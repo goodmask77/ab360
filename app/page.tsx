@@ -1,17 +1,28 @@
-import { redirect } from "next/navigation";
+"use client";
+
 import Link from "next/link";
-import { createServerSupabaseClient } from "@/lib/supabaseClient";
+import { useSession } from "@/lib/hooks/useSession";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
-export default async function Home() {
-  // 檢查是否已登入
-  const supabase = createServerSupabaseClient();
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+export default function Home() {
+  const { user, loading } = useSession();
+  const router = useRouter();
 
-  // 已登入則導向 /home
-  if (session) {
-    redirect("/home");
+  // 只在載入完成且已登入時才重定向，避免循環
+  useEffect(() => {
+    if (!loading && user) {
+      router.replace("/home");
+    }
+  }, [user, loading, router]);
+
+  // 載入中或已登入時顯示空白（避免閃爍）
+  if (loading || user) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-gray-500">載入中...</div>
+      </div>
+    );
   }
 
   // 未登入顯示歡迎頁

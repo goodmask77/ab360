@@ -10,6 +10,7 @@ export default function DebugToolsPage() {
   const { isAdmin, loading } = useSession();
   const router = useRouter();
   const [generating, setGenerating] = useState(false);
+  const [generatingFull, setGeneratingFull] = useState(false);
   const [result, setResult] = useState<{ success: boolean; message: string; data?: any } | null>(null);
 
   const handleGenerateDemoData = async () => {
@@ -51,6 +52,45 @@ export default function DebugToolsPage() {
     }
   };
 
+  const handleGenerateFullDemoData = async () => {
+    if (!confirm("確定要生成完整虛擬數據嗎？這會建立：\n- 50 位員工（含老闆、經理）\n- 3 個評鑑場次（過去、現在、未來）\n- 完整的評鑑記錄和答案\n- 豐富的積分投票記錄\n- AI 回饋數據\n\n這可能需要較長時間，請耐心等待。")) {
+      return;
+    }
+
+    setGeneratingFull(true);
+    setResult(null);
+
+    try {
+      const response = await fetch("/api/debug/create-full-demo-data", {
+        method: "POST",
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "生成失敗");
+      }
+
+      setResult({
+        success: true,
+        message: data.message || "已成功建立完整虛擬數據！",
+        data: data.data,
+      });
+
+      // 3 秒後自動刷新頁面
+      setTimeout(() => {
+        window.location.reload();
+      }, 3000);
+    } catch (error: any) {
+      setResult({
+        success: false,
+        message: error.message || "生成失敗",
+      });
+    } finally {
+      setGeneratingFull(false);
+    }
+  };
+
   if (loading) {
     return (
       <MobileLayout title="測試工具">
@@ -75,35 +115,62 @@ export default function DebugToolsPage() {
     <AuthGuard requireAuth={true} requireAdmin={true}>
       <MobileLayout title="測試工具">
         <div className="space-y-6">
-          {/* 說明 */}
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-            <h3 className="font-semibold text-gray-900 mb-2">📝 測試資料生成工具</h3>
-            <p className="text-sm text-gray-600">
-              此工具會自動建立：
+          {/* 完整數據生成 */}
+          <div className="bg-gradient-to-r from-purple-50 to-blue-50 border-2 border-purple-200 rounded-xl p-5">
+            <h3 className="font-bold text-gray-900 mb-2 text-lg">🎯 生成完整虛擬數據（推薦）</h3>
+            <p className="text-sm text-gray-700 mb-3">
+              生成豐富完整的測試數據，包含：
             </p>
-            <ul className="text-sm text-gray-600 mt-2 space-y-1 list-disc list-inside">
+            <ul className="text-sm text-gray-700 mb-4 space-y-1 list-disc list-inside">
+              <li>50 位員工（含 1 位老闆、4 位經理、45 位員工）</li>
+              <li>3 個評鑑場次（過去已結束、現在進行中、未來預告）</li>
+              <li>完整的評鑑記錄、答案和文字回饋</li>
+              <li>豐富的積分投票記錄（每位員工 5-10 筆）</li>
+              <li>AI 回饋數據</li>
+            </ul>
+            <button
+              onClick={handleGenerateFullDemoData}
+              disabled={generatingFull || generating}
+              className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-4 px-6 rounded-xl font-bold text-lg hover:from-purple-700 hover:to-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+            >
+              {generatingFull ? (
+                <span className="flex items-center justify-center gap-2">
+                  <span className="animate-spin">⏳</span>
+                  <span>生成中，請稍候...</span>
+                </span>
+              ) : (
+                "🚀 生成完整虛擬數據"
+              )}
+            </button>
+          </div>
+
+          {/* 快速測試數據 */}
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+            <h3 className="font-semibold text-gray-900 mb-2">⚡ 快速測試資料（20 筆）</h3>
+            <p className="text-sm text-gray-600 mb-3">
+              快速生成少量測試數據：
+            </p>
+            <ul className="text-sm text-gray-600 mb-4 space-y-1 list-disc list-inside">
               <li>20 位虛擬員工</li>
               <li>1 個評鑑場次（含 10 道預設題目）</li>
               <li>20 筆評鑑記錄</li>
               <li>20-50 筆積分投票</li>
             </ul>
+            <button
+              onClick={handleGenerateDemoData}
+              disabled={generating || generatingFull}
+              className="w-full bg-blue-600 text-white py-3 px-6 rounded-xl font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {generating ? (
+                <span className="flex items-center justify-center gap-2">
+                  <span className="animate-spin">⏳</span>
+                  <span>生成中...</span>
+                </span>
+              ) : (
+                "⚡ 生成 20 筆測試資料"
+              )}
+            </button>
           </div>
-
-          {/* 生成按鈕 */}
-          <button
-            onClick={handleGenerateDemoData}
-            disabled={generating}
-            className="w-full bg-blue-600 text-white py-4 px-6 rounded-xl font-bold text-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
-          >
-            {generating ? (
-              <span className="flex items-center justify-center gap-2">
-                <span className="animate-spin">⏳</span>
-                <span>生成中...</span>
-              </span>
-            ) : (
-              "⚡ 生成 20 筆測試資料"
-            )}
-          </button>
 
           {/* 結果顯示 */}
           {result && (
@@ -132,9 +199,26 @@ export default function DebugToolsPage() {
                 <div className="mt-3 pt-3 border-t border-gray-300">
                   <div className="text-xs text-gray-600 space-y-1">
                     <div>員工數：{result.data.employees_count}</div>
-                    <div>場次：{result.data.session_name}</div>
+                    {result.data.sessions_count ? (
+                      <>
+                        <div>場次數：{result.data.sessions_count}</div>
+                        <div className="mt-2">
+                          <div className="font-semibold">場次列表：</div>
+                          {result.data.sessions?.map((s: any) => (
+                            <div key={s.id} className="ml-2">
+                              • {s.name} ({s.status})
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    ) : (
+                      <div>場次：{result.data.session_name || result.data.session_id}</div>
+                    )}
                     <div>評鑑記錄：{result.data.records_count}</div>
                     <div>積分投票：{result.data.points_count}</div>
+                    {result.data.assignments_count && (
+                      <div>評鑑任務：{result.data.assignments_count}</div>
+                    )}
                   </div>
                 </div>
               )}

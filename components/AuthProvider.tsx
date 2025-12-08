@@ -96,18 +96,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // 初始載入
     refresh();
 
-    // 監聽認證狀態變化
+    // 監聽認證狀態變化（只監聽關鍵事件，避免過度觸發）
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "TOKEN_REFRESHED") {
+      // 只在關鍵事件時刷新，避免無限循環
+      if (event === "SIGNED_IN" || event === "SIGNED_OUT") {
         refresh();
       }
+      // TOKEN_REFRESHED 不觸發 refresh，避免頻繁更新
     });
 
     return () => {
       subscription.unsubscribe();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

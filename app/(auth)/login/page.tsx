@@ -14,13 +14,10 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 如果已登入，導向首頁
-  // 使用 useRef 避免重複重定向
-  const hasRedirectedRef = useRef(false);
+  // 如果已登入，導向首頁（使用 replace 避免歷史記錄堆疊）
   useEffect(() => {
-    if (!authLoading && user && !hasRedirectedRef.current) {
-      hasRedirectedRef.current = true;
-      router.push("/home");
+    if (!authLoading && user) {
+      router.replace("/home");
     }
   }, [user, authLoading, router]);
 
@@ -37,11 +34,8 @@ export default function LoginPage() {
       }
 
       if (result.user || result.session) {
-        // 登入成功，等待 session 完全建立
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        
-        // 重導向到首頁
-        window.location.href = "/home";
+        // 登入成功，使用 router.replace 避免歷史記錄堆疊
+        router.replace("/home");
       }
     } catch (err: any) {
       console.error("登入錯誤:", err);
