@@ -23,7 +23,12 @@ export default function EmployeeDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!authLoading && employee) {
+    if (!authLoading) {
+      if (!employee) {
+        // 如果沒有員工資料，可能是 RLS 問題或資料不存在
+        setLoading(false);
+        return;
+      }
       loadTasks();
     }
   }, [employee, authLoading]);
@@ -139,10 +144,37 @@ export default function EmployeeDashboard() {
     }
   };
 
-  if (authLoading || loading) {
+  if (authLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-gray-500">載入中...</div>
+      </div>
+    );
+  }
+
+  if (!employee) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+        <div className="text-red-600 font-semibold">無法載入員工資料</div>
+        <div className="text-gray-600 text-sm text-center max-w-md">
+          <p>可能的原因：</p>
+          <ul className="list-disc list-inside mt-2 space-y-1">
+            <li>員工資料尚未建立（需要在 Supabase 的 employees 表中建立對應記錄）</li>
+            <li>RLS 政策設定問題</li>
+            <li>auth_user_id 與 Supabase Auth 的 user.id 不匹配</li>
+          </ul>
+          <p className="mt-4 text-xs">
+            請檢查瀏覽器 Console 的錯誤訊息，或參考 SETUP_GUIDE.md 建立員工資料。
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-gray-500">載入任務中...</div>
       </div>
     );
   }

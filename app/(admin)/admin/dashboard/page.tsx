@@ -95,10 +95,29 @@ export default function AdminDashboard() {
     return new Date(date).toLocaleDateString("zh-TW");
   };
 
-  if (authLoading || loading) {
+  if (authLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-gray-500">載入中...</div>
+      </div>
+    );
+  }
+
+  if (!employee) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+        <div className="text-red-600 font-semibold">無法載入員工資料</div>
+        <div className="text-gray-600 text-sm text-center max-w-md">
+          <p>請確認已在 Supabase 的 employees 表中建立對應記錄。</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-gray-500">載入場次中...</div>
       </div>
     );
   }

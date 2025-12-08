@@ -17,11 +17,18 @@ export default function LoginPage() {
     setError(null);
 
     try {
-      await signIn(email, password);
-      // 登入成功，重導向到儀表板
-      router.push("/dashboard");
-      router.refresh();
+      const { user } = await signIn(email, password);
+      
+      if (user) {
+        // 登入成功，等待一下讓 session 建立
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        
+        // 重導向到儀表板
+        router.push("/dashboard");
+        router.refresh();
+      }
     } catch (err: any) {
+      console.error("登入錯誤:", err);
       setError(err.message || "登入失敗，請檢查帳號密碼");
     } finally {
       setLoading(false);
@@ -88,4 +95,3 @@ export default function LoginPage() {
     </div>
   );
 }
-
