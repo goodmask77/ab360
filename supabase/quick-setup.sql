@@ -159,7 +159,7 @@ BEGIN
   FOREACH emp_id IN ARRAY emp_ids
   LOOP
     INSERT INTO evaluation_records (session_id, evaluator_id, target_id, type, is_named)
-    VALUES (session_id_var, emp_id, emp_id, 'self', false)
+    VALUES (session_id_var, emp_id::UUID, emp_id::UUID, 'self', false)
     ON CONFLICT (session_id, evaluator_id, target_id, type) DO NOTHING;
   END LOOP;
 
@@ -178,7 +178,7 @@ BEGIN
       LIMIT 3
     LOOP
       INSERT INTO evaluation_records (session_id, evaluator_id, target_id, type, is_named)
-      VALUES (session_id_var, emp_id, target_emp_id, 'peer', false)
+      VALUES (session_id_var::UUID, emp_id::UUID, target_emp_id::UUID, 'peer', false)
       ON CONFLICT (session_id, evaluator_id, target_id, type) DO NOTHING;
       i := i + 1;
     END LOOP;
