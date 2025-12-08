@@ -125,6 +125,21 @@ export default function AdminPage() {
               </Link>
             </div>
             
+            {/* 修復管理員帳號按鈕（如果沒有管理員權限時顯示） */}
+            {!isAdmin && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+                <p className="text-sm text-yellow-800 mb-3">
+                  ⚠️ 您目前沒有管理員權限。點擊下方按鈕自動修復：
+                </p>
+                <Link
+                  href="/admin/fix-admin"
+                  className="block w-full bg-yellow-600 text-white text-center py-3 px-4 rounded-lg hover:bg-yellow-700 transition-colors font-medium"
+                >
+                  🔧 修復管理員帳號
+                </Link>
+              </div>
+            )}
+            
             {/* 權限提示 */}
             {!isAdmin && (
               <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
