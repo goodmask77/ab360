@@ -105,6 +105,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         refresh();
       }
       // TOKEN_REFRESHED 不觸發 refresh，避免頻繁更新
+      // 但如果是 SIGNED_IN，需要立即刷新以取得員工資料
     });
 
     return () => {

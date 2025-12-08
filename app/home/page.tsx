@@ -30,6 +30,9 @@ export default function HomePage() {
     // 如果有員工資料，載入場次
     if (employee) {
       loadSessions();
+    } else {
+      // 如果沒有員工資料，停止載入狀態
+      setLoadingSessions(false);
     }
     // 注意：即使沒有員工資料，也不重定向，讓 AuthGuard 處理
     // 避免與 login 頁面的重定向形成循環
