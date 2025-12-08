@@ -122,7 +122,7 @@ DECLARE
   session_id_var UUID;
   emp_ids UUID[];
   emp_id UUID;
-  target_id UUID;
+  target_emp_id UUID;
   i INTEGER;
   emp_count INTEGER;
 BEGIN
@@ -170,15 +170,15 @@ BEGIN
   LOOP
     i := 0;
     -- 每個員工評其他 3 個員工
-    FOR target_id IN 
-      SELECT id 
-      FROM employees
-      WHERE role = 'staff' AND id != emp_id
+    FOR target_emp_id IN 
+      SELECT e.id 
+      FROM employees e
+      WHERE e.role = 'staff' AND e.id != emp_id
       ORDER BY RANDOM()
       LIMIT 3
     LOOP
       INSERT INTO evaluation_records (session_id, evaluator_id, target_id, type, is_named)
-      VALUES (session_id_var, emp_id, target_id, 'peer', false)
+      VALUES (session_id_var, emp_id, target_emp_id, 'peer', false)
       ON CONFLICT (session_id, evaluator_id, target_id, type) DO NOTHING;
       i := i + 1;
     END LOOP;
