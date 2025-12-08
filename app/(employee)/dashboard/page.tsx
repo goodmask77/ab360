@@ -110,7 +110,7 @@ export default function EmployeeDashboard() {
           .from("employees")
           .select("name")
           .eq("id", record.target_id)
-          .single();
+          .maybeSingle();
 
         peerTasksData.push({
           id: record.id,

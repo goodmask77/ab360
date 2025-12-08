@@ -49,7 +49,7 @@ export default function PeerEvaluationPage() {
             .from("employees")
             .select("name, department")
             .eq("id", targetId)
-            .single(),
+            .maybeSingle(),
         ]);
 
       if (targetError) {

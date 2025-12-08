@@ -62,13 +62,19 @@ export async function getCurrentEmployee(): Promise<Employee | null> {
   if (!user) return null;
 
   const supabase = createBrowserSupabaseClient();
+  // 使用 maybeSingle() 避免當沒有資料時拋出錯誤
   const { data, error } = await supabase
     .from("employees")
     .select("*")
     .eq("auth_user_id", user.id)
-    .single();
+    .maybeSingle();
 
-  if (error || !data) return null;
+  // PGRST116 表示沒有資料，這是正常的（員工資料可能尚未建立）
+  if (error && error.code !== "PGRST116") {
+    console.error("[API ERROR] get current employee:", error);
+  }
+  
+  if (!data) return null;
   return data as Employee;
 }
 

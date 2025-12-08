@@ -50,14 +50,14 @@ export default function TasksPage() {
           .from("employees")
           .select("name, department")
           .eq("id", assignment.target_id)
-          .single();
+          .maybeSingle();
 
         // 取得場次資訊
         const { data: session } = await supabase
           .from("evaluation_sessions")
           .select("name, status")
           .eq("id", assignment.session_id)
-          .single();
+          .maybeSingle();
 
         // 只顯示進行中的場次
         if (session?.status === "open") {

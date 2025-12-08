@@ -57,15 +57,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(currentUser);
 
       if (currentUser) {
+        // 使用 maybeSingle() 避免當沒有資料時拋出錯誤
         const { data: emp, error: empError } = await supabase
           .from("employees")
           .select("*")
           .eq("auth_user_id", currentUser.id)
-          .single();
+          .maybeSingle();
 
         if (empError) {
-          console.error("查詢員工資料失敗:", empError);
-          console.error("錯誤詳情:", JSON.stringify(empError, null, 2));
+          // 只有非 PGRST116 錯誤才記錄（PGRST116 表示沒有資料，這是正常的）
+          if (empError.code !== "PGRST116") {
+            console.error("查詢員工資料失敗:", empError);
+            console.error("錯誤詳情:", JSON.stringify(empError, null, 2));
+          }
           setEmployee(null);
         } else {
           setEmployee(emp as Employee | null);
