@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useRef } from "react";
 import { createBrowserSupabaseClient } from "@/lib/supabaseClient";
 import type { User } from "@supabase/supabase-js";
 import type { Employee } from "@/lib/auth";
@@ -23,10 +23,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [employee, setEmployee] = useState<Employee | null>(null);
   const [loading, setLoading] = useState(true);
+  const supabaseRef = useRef(createBrowserSupabaseClient());
+  const initializedRef = useRef(false);
 
   const refresh = async () => {
     try {
-      const supabase = createBrowserSupabaseClient();
+      const supabase = supabaseRef.current;
       const {
         data: { user: currentUser },
         error: userError,
@@ -51,8 +53,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (empError) {
           console.error("查詢員工資料失敗:", empError);
-          // 如果查詢失敗，可能是 RLS 政策問題或員工資料不存在
-          // 但仍然設定 loading 為 false，讓使用者可以看到錯誤訊息
           setEmployee(null);
         } else {
           setEmployee(emp as Employee | null);
@@ -70,13 +70,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
+    // 只初始化一次
+    if (initializedRef.current) return;
+    initializedRef.current = true;
+
+    const supabase = supabaseRef.current;
+
+    // 初始載入
     refresh();
 
-    const supabase = createBrowserSupabaseClient();
+    // 監聽認證狀態變化
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(() => {
-      refresh();
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "TOKEN_REFRESHED") {
+        refresh();
+      }
     });
 
     return () => {
