@@ -1,3 +1,5 @@
+"use client";
+
 export default function AdminDashboard() {
   // 假資料 - 之後會從 Supabase 查詢
   const evaluationSessions = [

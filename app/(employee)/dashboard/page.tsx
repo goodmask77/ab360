@@ -1,3 +1,5 @@
+"use client";
+
 export default function EmployeeDashboard() {
   // 假資料 - 之後會從 Supabase 查詢
   const selfEvaluationTasks = [
