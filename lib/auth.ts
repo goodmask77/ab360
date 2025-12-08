@@ -26,16 +26,12 @@ export async function signIn(email: string, password: string) {
     throw error;
   }
 
-  // 確保 session 已建立
-  if (data.session) {
-    // Session 已建立，返回資料
-    return data;
-  } else {
-    // 如果沒有 session，等待一下再檢查
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    const { data: sessionData } = await supabase.auth.getSession();
-    return { ...data, session: sessionData.session };
-  }
+  // 返回完整的登入結果
+  return {
+    user: data.user,
+    session: data.session,
+    error: null,
+  };
 }
 
 /**

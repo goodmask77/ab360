@@ -17,13 +17,13 @@ export default function LoginPage() {
     setError(null);
 
     try {
-      const { data, error: signInError } = await signIn(email, password);
+      const result = await signIn(email, password);
       
-      if (signInError) {
-        throw signInError;
+      if (result.error) {
+        throw result.error;
       }
 
-      if (data?.user) {
+      if (result.user || result.session) {
         // 登入成功，等待 session 完全建立
         await new Promise((resolve) => setTimeout(resolve, 1000));
         

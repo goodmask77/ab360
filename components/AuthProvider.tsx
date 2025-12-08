@@ -36,7 +36,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         error: sessionError,
       } = await supabase.auth.getSession();
 
-      if (sessionError || !session) {
+      if (sessionError) {
         console.error("Session 錯誤:", sessionError);
         setUser(null);
         setEmployee(null);
@@ -44,19 +44,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      const {
-        data: { user: currentUser },
-        error: userError,
-      } = await supabase.auth.getUser();
-
-      if (userError) {
-        console.error("取得使用者失敗:", userError);
+      if (!session) {
+        // 沒有 session，使用者未登入
         setUser(null);
         setEmployee(null);
         setLoading(false);
         return;
       }
 
+      // 使用 session 中的 user，避免再次請求
+      const currentUser = session.user;
       setUser(currentUser);
 
       if (currentUser) {
@@ -68,6 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (empError) {
           console.error("查詢員工資料失敗:", empError);
+          console.error("錯誤詳情:", JSON.stringify(empError, null, 2));
           setEmployee(null);
         } else {
           setEmployee(emp as Employee | null);
