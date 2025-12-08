@@ -83,6 +83,25 @@ SELECT id, '主管一', 'manager@ab360.com', 'manager', 'management'
 FROM auth.users WHERE email = 'manager@ab360.com'
 ON CONFLICT (auth_user_id) DO UPDATE SET name = EXCLUDED.name, role = EXCLUDED.role, email = EXCLUDED.email;
 
+-- 檢查員工資料建立情況
+DO $$
+DECLARE
+  staff_count INTEGER;
+  total_count INTEGER;
+BEGIN
+  SELECT COUNT(*) INTO staff_count FROM employees WHERE role = 'staff';
+  SELECT COUNT(*) INTO total_count FROM employees;
+  
+  RAISE NOTICE '📊 員工資料統計：';
+  RAISE NOTICE '   - 總員工數：%', total_count;
+  RAISE NOTICE '   - 一般員工：%', staff_count;
+  RAISE NOTICE '   - 管理員：%', (SELECT COUNT(*) FROM employees WHERE role IN ('manager', 'owner'));
+  
+  IF staff_count = 0 THEN
+    RAISE NOTICE '⚠️ 警告：沒有一般員工資料，請確認所有 Auth 使用者已建立！';
+  END IF;
+END $$;
+
 -- ============================================
 -- 步驟 2: 建立評鑑場次
 -- ============================================
@@ -105,6 +124,7 @@ DECLARE
   emp_id UUID;
   target_id UUID;
   i INTEGER;
+  emp_count INTEGER;
 BEGIN
   -- 取得進行中的場次 ID
   SELECT id INTO session_id_var 
@@ -120,10 +140,20 @@ BEGIN
     RETURNING id INTO session_id_var;
   END IF;
 
-  -- 取得所有員工 ID
-  SELECT ARRAY_AGG(id) INTO emp_ids
+  -- 取得所有員工 ID（使用 COALESCE 避免 null）
+  SELECT COALESCE(ARRAY_AGG(id), ARRAY[]::UUID[]) INTO emp_ids
   FROM employees
   WHERE role = 'staff';
+
+  -- 檢查是否有員工
+  emp_count := array_length(emp_ids, 1);
+  
+  IF emp_count IS NULL OR emp_count = 0 THEN
+    RAISE NOTICE '⚠️ 沒有找到員工資料，請先建立員工資料！';
+    RETURN;
+  END IF;
+
+  RAISE NOTICE '📝 找到 % 個員工，開始建立評鑑記錄...', emp_count;
 
   -- 為每個員工建立自評記錄
   FOREACH emp_id IN ARRAY emp_ids
@@ -132,6 +162,8 @@ BEGIN
     VALUES (session_id_var, emp_id, emp_id, 'self', false)
     ON CONFLICT (session_id, evaluator_id, target_id, type) DO NOTHING;
   END LOOP;
+
+  RAISE NOTICE '✅ 已建立 % 個自評記錄', emp_count;
 
   -- 建立同儕評記錄（每個員工評其他 3 個員工）
   FOREACH emp_id IN ARRAY emp_ids
@@ -153,7 +185,7 @@ BEGIN
   END LOOP;
 
   RAISE NOTICE '✅ 測試資料建立完成！場次 ID: %', session_id_var;
-  RAISE NOTICE '✅ 已建立 % 個員工的自評記錄', array_length(emp_ids, 1);
+  RAISE NOTICE '✅ 已建立 % 個員工的自評和同儕評記錄', emp_count;
 END $$;
 
 -- ============================================
