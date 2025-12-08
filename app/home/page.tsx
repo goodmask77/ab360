@@ -46,28 +46,39 @@ export default function HomePage() {
         .eq("status", "open")
         .order("created_at", { ascending: false });
 
-      if (sessionsError) throw sessionsError;
+      if (sessionsError) {
+        console.error("[API ERROR] load evaluation sessions:", sessionsError);
+        throw sessionsError;
+      }
 
       // 為每個場次查詢 assignments
       const sessionCards: SessionCard[] = [];
       for (const session of openSessions || []) {
         // 查詢自評 assignment
-        const { data: selfAssignment } = await supabase
+        const { data: selfAssignment, error: selfError } = await supabase
           .from("evaluation_assignments")
           .select("status")
           .eq("session_id", session.id)
           .eq("evaluator_id", employee.id)
           .eq("target_id", employee.id)
           .eq("is_self", true)
-          .single();
+          .maybeSingle();
+
+        if (selfError && selfError.code !== "PGRST116") {
+          console.error("[API ERROR] get self assignment:", selfError);
+        }
 
         // 查詢同儕評 assignments
-        const { data: peerAssignments } = await supabase
+        const { data: peerAssignments, error: peerError } = await supabase
           .from("evaluation_assignments")
           .select("status")
           .eq("session_id", session.id)
           .eq("evaluator_id", employee.id)
           .eq("is_self", false);
+
+        if (peerError) {
+          console.error("[API ERROR] get peer assignments:", peerError);
+        }
 
         const peerCompleted = peerAssignments?.filter((a) => a.status === "completed").length || 0;
         const peerTotal = peerAssignments?.length || 0;
@@ -85,7 +96,7 @@ export default function HomePage() {
 
       setSessions(sessionCards);
     } catch (error) {
-      console.error("載入場次失敗:", error);
+      console.error("[API ERROR] load sessions:", error);
     } finally {
       setLoadingSessions(false);
     }
@@ -201,17 +212,35 @@ export default function HomePage() {
             <div className="grid grid-cols-2 gap-4">
               <Link
                 href="/tasks"
-                className="bg-white rounded-lg shadow-sm p-4 text-center border border-gray-200 hover:border-blue-300 hover:shadow transition-all"
+                className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 text-center border-2 border-blue-200 hover:border-blue-400 hover:shadow-lg transition-all active:scale-[0.98]"
               >
-                <div className="text-sm text-gray-500 mb-1">我的任務</div>
-                <div className="text-lg font-semibold text-gray-900">查看任務</div>
+                <div className="text-2xl mb-2">📝</div>
+                <div className="text-sm text-gray-600 mb-1">我的任務</div>
+                <div className="text-base font-semibold text-gray-900">查看任務</div>
               </Link>
               <Link
-                href="/feedback"
-                className="bg-white rounded-lg shadow-sm p-4 text-center border border-gray-200 hover:border-blue-300 hover:shadow transition-all"
+                href="/me"
+                className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-4 text-center border-2 border-emerald-200 hover:border-emerald-400 hover:shadow-lg transition-all active:scale-[0.98]"
               >
-                <div className="text-sm text-gray-500 mb-1">我的回饋</div>
-                <div className="text-lg font-semibold text-gray-900">查看回饋</div>
+                <div className="text-2xl mb-2">📊</div>
+                <div className="text-sm text-gray-600 mb-1">我的回饋</div>
+                <div className="text-base font-semibold text-gray-900">查看回饋</div>
+              </Link>
+              <Link
+                href="/rewards"
+                className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-4 text-center border-2 border-amber-200 hover:border-amber-400 hover:shadow-lg transition-all active:scale-[0.98]"
+              >
+                <div className="text-2xl mb-2">🪙</div>
+                <div className="text-sm text-gray-600 mb-1">我的積分</div>
+                <div className="text-base font-semibold text-gray-900">積分系統</div>
+              </Link>
+              <Link
+                href="/rewards/leaderboard"
+                className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-4 text-center border-2 border-purple-200 hover:border-purple-400 hover:shadow-lg transition-all active:scale-[0.98]"
+              >
+                <div className="text-2xl mb-2">🏆</div>
+                <div className="text-sm text-gray-600 mb-1">排行榜</div>
+                <div className="text-base font-semibold text-gray-900">查看排名</div>
               </Link>
             </div>
           </div>

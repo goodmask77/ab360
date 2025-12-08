@@ -138,7 +138,7 @@ export default function EmployeeDashboard() {
 
       setPeerTasks(peerTasksData);
     } catch (error) {
-      console.error("載入任務失敗:", error);
+      console.error("[API ERROR] load dashboard tasks:", error);
     } finally {
       setLoading(false);
     }

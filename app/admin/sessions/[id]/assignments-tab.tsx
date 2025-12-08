@@ -26,12 +26,18 @@ export default function SessionAssignmentsTab({ sessionId }: { sessionId: string
 
   const loadData = async () => {
     try {
-      const [assignmentsData, { data: employeesData }] = await Promise.all([
+      const supabase = createBrowserSupabaseClient();
+      const [assignmentsData, { data: employeesData, error: employeesError }] = await Promise.all([
         getSessionAssignments(sessionId),
-        createBrowserSupabaseClient()
+        supabase
           .from("employees")
           .select("id, name, department"),
       ]);
+
+      if (employeesError) {
+        console.error("[API ERROR] get employees:", employeesError);
+        throw employeesError;
+      }
 
       setAssignments(assignmentsData);
 
@@ -64,7 +70,7 @@ export default function SessionAssignmentsTab({ sessionId }: { sessionId: string
 
       setEmployees(Object.values(progressMap));
     } catch (error) {
-      console.error("載入資料失敗:", error);
+      console.error("[API ERROR] load assignments data:", error);
     } finally {
       setLoading(false);
     }

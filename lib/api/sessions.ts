@@ -6,6 +6,8 @@ export interface EvaluationSession {
   start_at: string | null;
   end_at: string | null;
   status: "draft" | "open" | "closed";
+  reward_pool_points?: number;
+  vote_quota_per_user?: number;
   created_at: string;
 }
 
@@ -14,6 +16,8 @@ export interface CreateSessionInput {
   start_at?: string;
   end_at?: string;
   status?: "draft" | "open" | "closed";
+  reward_pool_points?: number;
+  vote_quota_per_user?: number;
 }
 
 export interface UpdateSessionInput {
@@ -21,6 +25,8 @@ export interface UpdateSessionInput {
   start_at?: string | null;
   end_at?: string | null;
   status?: "draft" | "open" | "closed";
+  reward_pool_points?: number;
+  vote_quota_per_user?: number;
 }
 
 /**
@@ -33,7 +39,10 @@ export async function getAllSessions(): Promise<EvaluationSession[]> {
     .select("*")
     .order("created_at", { ascending: false });
 
-  if (error) throw error;
+  if (error) {
+    console.error("[API ERROR] get all sessions:", error);
+    throw error;
+  }
   return data || [];
 }
 
@@ -48,7 +57,10 @@ export async function getSessionById(id: string): Promise<EvaluationSession | nu
     .eq("id", id)
     .single();
 
-  if (error) throw error;
+  if (error) {
+    console.error("[API ERROR] get session by id:", error);
+    throw error;
+  }
   return data;
 }
 
@@ -64,11 +76,16 @@ export async function createSession(input: CreateSessionInput): Promise<Evaluati
       start_at: input.start_at || null,
       end_at: input.end_at || null,
       status: input.status || "draft",
+      reward_pool_points: input.reward_pool_points || 1000,
+      vote_quota_per_user: input.vote_quota_per_user || 100,
     })
     .select()
     .single();
 
-  if (error) throw error;
+  if (error) {
+    console.error("[API ERROR] create session:", error);
+    throw error;
+  }
   return data;
 }
 
@@ -87,12 +104,17 @@ export async function updateSession(
       ...(input.start_at !== undefined && { start_at: input.start_at || null }),
       ...(input.end_at !== undefined && { end_at: input.end_at || null }),
       ...(input.status !== undefined && { status: input.status }),
+      ...(input.reward_pool_points !== undefined && { reward_pool_points: input.reward_pool_points }),
+      ...(input.vote_quota_per_user !== undefined && { vote_quota_per_user: input.vote_quota_per_user }),
     })
     .eq("id", id)
     .select()
     .single();
 
-  if (error) throw error;
+  if (error) {
+    console.error("[API ERROR] update session:", error);
+    throw error;
+  }
   return data;
 }
 
@@ -112,7 +134,10 @@ export async function getSessionCompletion(sessionId: string): Promise<{
     .select("status")
     .eq("session_id", sessionId);
 
-  if (error) throw error;
+  if (error) {
+    console.error("[API ERROR] get session completion:", error);
+    throw error;
+  }
 
   const total = assignments?.length || 0;
   const completed = assignments?.filter((a) => a.status === "completed").length || 0;

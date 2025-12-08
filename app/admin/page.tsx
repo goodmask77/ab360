@@ -45,7 +45,7 @@ export default function AdminPage() {
 
       setSessions(sessionsWithCompletion);
     } catch (error) {
-      console.error("載入場次失敗:", error);
+      console.error("[API ERROR] load sessions:", error);
     } finally {
       setLoadingSessions(false);
     }
@@ -95,13 +95,33 @@ export default function AdminPage() {
       ) : (
         <MobileLayout title="管理後台">
           <div className="space-y-4">
-            {/* 建立新場次按鈕 */}
-            <Link
-              href="/admin/sessions/new"
-              className="block w-full bg-blue-600 text-white text-center py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium"
-            >
-              + 建立新場次
-            </Link>
+            {/* 快速操作 */}
+            <div className="grid grid-cols-2 gap-3">
+              <Link
+                href="/admin/sessions/new"
+                className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-center py-3 px-4 rounded-xl hover:shadow-lg transition-all font-medium"
+              >
+                + 建立場次
+              </Link>
+              <Link
+                href="/admin/employees"
+                className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-center py-3 px-4 rounded-xl hover:shadow-lg transition-all font-medium"
+              >
+                👥 員工進度
+              </Link>
+              <Link
+                href="/admin/rewards"
+                className="bg-gradient-to-r from-amber-500 to-orange-600 text-white text-center py-3 px-4 rounded-xl hover:shadow-lg transition-all font-medium"
+              >
+                🎁 積分管理
+              </Link>
+              <Link
+                href="/admin/debug-tools"
+                className="bg-gradient-to-r from-purple-500 to-pink-600 text-white text-center py-3 px-4 rounded-xl hover:shadow-lg transition-all font-medium"
+              >
+                🔧 測試工具
+              </Link>
+            </div>
 
             {/* 場次列表 */}
             {sessions.length === 0 ? (

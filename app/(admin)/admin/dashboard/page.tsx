@@ -45,10 +45,13 @@ export default function AdminDashboard() {
         .select("*")
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error("[API ERROR] load sessions:", error);
+        throw error;
+      }
       setSessions(data || []);
     } catch (error) {
-      console.error("載入場次失敗:", error);
+      console.error("[API ERROR] load sessions:", error);
     } finally {
       setLoading(false);
     }
@@ -57,16 +60,22 @@ export default function AdminDashboard() {
   const handleCreateSession = async () => {
     try {
       const supabase = createBrowserSupabaseClient();
-      const { error } = await supabase.from("evaluation_sessions").insert([
-        {
-          name: newSession.name,
-          start_at: newSession.start_at || null,
-          end_at: newSession.end_at || null,
-          status: newSession.status,
-        },
-      ]);
+      const { error } = await supabase
+        .from("evaluation_sessions")
+        .insert([
+          {
+            name: newSession.name,
+            start_at: newSession.start_at || null,
+            end_at: newSession.end_at || null,
+            status: newSession.status,
+          },
+        ])
+        .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error("[API ERROR] create session:", error);
+        throw error;
+      }
 
       setShowCreateModal(false);
       setNewSession({ name: "", start_at: "", end_at: "", status: "draft" });

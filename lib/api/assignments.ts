@@ -30,7 +30,10 @@ export async function getUserAssignments(
 
   const { data, error } = await query.order("created_at", { ascending: false });
 
-  if (error) throw error;
+  if (error) {
+    console.error("[API ERROR] get user assignments:", error);
+    throw error;
+  }
   return data || [];
 }
 
@@ -47,7 +50,10 @@ export async function getSessionAssignments(
     .eq("session_id", sessionId)
     .order("created_at", { ascending: false });
 
-  if (error) throw error;
+  if (error) {
+    console.error("[API ERROR] get session assignments:", error);
+    throw error;
+  }
   return data || [];
 }
 
@@ -69,7 +75,10 @@ export async function updateAssignmentStatus(
     .select()
     .single();
 
-  if (error) throw error;
+  if (error) {
+    console.error("[API ERROR] update assignment status:", error);
+    throw error;
+  }
   return data;
 }
 

@@ -28,7 +28,7 @@ export default function FeedbackDetailPage() {
       const sessionData = await getSessionById(sessionId);
       setSession(sessionData);
     } catch (error) {
-      console.error("載入資料失敗:", error);
+      console.error("[API ERROR] load feedback detail:", error);
     } finally {
       setLoadingData(false);
     }

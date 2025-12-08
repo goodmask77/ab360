@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import { useSession } from "@/lib/hooks/useSession";
 import { getSessionById, updateSession, type EvaluationSession } from "@/lib/api/sessions";
 import MobileLayout from "@/components/MobileLayout";
@@ -33,7 +34,7 @@ export default function SessionManagePage() {
       const data = await getSessionById(sessionId);
       setSession(data);
     } catch (error) {
-      console.error("載入場次失敗:", error);
+      console.error("[API ERROR] load session:", error);
     } finally {
       setLoading(false);
     }
@@ -46,7 +47,7 @@ export default function SessionManagePage() {
       const updated = await updateSession(sessionId, updates as any);
       setSession(updated);
     } catch (error) {
-      console.error("更新場次失敗:", error);
+      console.error("[API ERROR] update session:", error);
       throw error;
     }
   };
@@ -100,6 +101,20 @@ export default function SessionManagePage() {
               id: "assignments",
               label: "分配與進度",
               content: <SessionAssignmentsTab sessionId={sessionId} />,
+            },
+            {
+              id: "employees",
+              label: "員工進度",
+              content: (
+                <div className="text-center py-8">
+                  <Link
+                    href="/admin/employees"
+                    className="inline-block bg-emerald-500 text-white px-6 py-3 rounded-xl hover:bg-emerald-600 transition-colors font-medium"
+                  >
+                    查看所有員工進度
+                  </Link>
+                </div>
+              ),
             },
             {
               id: "results",

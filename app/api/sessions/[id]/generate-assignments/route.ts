@@ -14,7 +14,10 @@ export async function POST(
       .from("employees")
       .select("id, department");
 
-    if (employeesError) throw employeesError;
+    if (employeesError) {
+      console.error("[API ERROR] get employees:", employeesError);
+      throw employeesError;
+    }
 
     if (!employees || employees.length === 0) {
       return NextResponse.json(
@@ -76,16 +79,20 @@ export async function POST(
     // 批次插入
     const { error: insertError } = await supabase
       .from("evaluation_assignments")
-      .insert(assignments);
+      .insert(assignments)
+      .select();
 
-    if (insertError) throw insertError;
+    if (insertError) {
+      console.error("[API ERROR] generate assignments:", insertError);
+      throw insertError;
+    }
 
     return NextResponse.json({
       success: true,
       count: assignments.length,
     });
   } catch (error: any) {
-    console.error("產生分配失敗:", error);
+    console.error("[API ERROR] generate assignments:", error);
     return NextResponse.json(
       { error: error.message || "產生分配失敗" },
       { status: 500 }

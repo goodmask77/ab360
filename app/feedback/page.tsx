@@ -81,7 +81,7 @@ export default function FeedbackPage() {
 
       setSessions(sessionsWithFeedback);
     } catch (error) {
-      console.error("載入回饋失敗:", error);
+      console.error("[API ERROR] load feedback:", error);
     } finally {
       setLoadingSessions(false);
     }

@@ -16,11 +16,14 @@ export default function SessionSettingsTab({
   onReload,
 }: SessionSettingsTabProps) {
   const router = useRouter();
+  const sessionWithRewards = session as any;
   const [formData, setFormData] = useState({
     name: session.name,
     start_at: session.start_at ? new Date(session.start_at).toISOString().split("T")[0] : "",
     end_at: session.end_at ? new Date(session.end_at).toISOString().split("T")[0] : "",
     status: session.status,
+    reward_pool_points: sessionWithRewards?.reward_pool_points ?? 1000,
+    vote_quota_per_user: sessionWithRewards?.vote_quota_per_user ?? 100,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -36,7 +39,9 @@ export default function SessionSettingsTab({
         start_at: formData.start_at || null,
         end_at: formData.end_at || null,
         status: formData.status as "draft" | "open" | "closed",
-      });
+        reward_pool_points: formData.reward_pool_points,
+        vote_quota_per_user: formData.vote_quota_per_user,
+      } as any);
       await onReload();
       alert("場次已更新");
     } catch (err: any) {
@@ -103,6 +108,47 @@ export default function SessionSettingsTab({
             onChange={(e) => setFormData({ ...formData, end_at: e.target.value })}
             className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
           />
+        </div>
+
+        {/* 積分設定 */}
+        <div className="border-t border-gray-200 pt-4">
+          <h4 className="text-sm font-semibold text-gray-900 mb-3">積分設定</h4>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                獎金池總點數
+              </label>
+              <input
+                type="number"
+                min="0"
+                value={formData.reward_pool_points}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    reward_pool_points: parseInt(e.target.value) || 0,
+                  })
+                }
+                className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                每位使用者可分配點數
+              </label>
+              <input
+                type="number"
+                min="0"
+                value={formData.vote_quota_per_user}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    vote_quota_per_user: parseInt(e.target.value) || 0,
+                  })
+                }
+                className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+              />
+            </div>
+          </div>
         </div>
 
         <button

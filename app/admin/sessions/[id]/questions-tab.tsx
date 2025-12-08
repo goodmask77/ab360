@@ -7,6 +7,7 @@ import {
   updateQuestion,
   deleteQuestion,
   reorderQuestions,
+  createDefaultQuestions,
   type Question,
   type CreateQuestionInput,
   type UpdateQuestionInput,
@@ -124,17 +125,44 @@ export default function SessionQuestionsTab({ sessionId }: { sessionId: string }
       )}
 
       {/* 新增題目按鈕 */}
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold text-gray-900">題目列表</h3>
-        <button
-          onClick={() => {
-            setEditingQuestion(null);
-            setShowForm(true);
-          }}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-        >
-          + 新增題目
-        </button>
+      <div className="flex flex-col gap-3">
+        <div className="flex justify-between items-center">
+          <h3 className="text-lg font-semibold text-gray-900">題目列表</h3>
+          <button
+            onClick={() => {
+              setEditingQuestion(null);
+              setShowForm(true);
+            }}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+          >
+            + 新增題目
+          </button>
+        </div>
+
+        {/* 快速新增預設題目 */}
+        {questions.length === 0 && (
+          <button
+            onClick={async () => {
+              if (
+                !confirm(
+                  "確定要快速新增10道預設題目嗎？這會自動建立針對餐飲業基層夥伴的評鑑題目。"
+                )
+              )
+                return;
+
+              try {
+                await createDefaultQuestions(sessionId);
+                await loadQuestions();
+                alert("已成功建立10道預設題目！");
+              } catch (err: any) {
+                alert("建立失敗: " + err.message);
+              }
+            }}
+            className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white py-3 px-4 rounded-xl hover:shadow-lg transition-all font-medium"
+          >
+            ⚡ 快速新增預設10道題目
+          </button>
+        )}
       </div>
 
       {/* 題目表單 */}
