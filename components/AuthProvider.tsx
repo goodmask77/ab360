@@ -29,6 +29,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const refresh = async () => {
     try {
       const supabase = supabaseRef.current;
+      
+      // 先檢查 session
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
+
+      if (sessionError || !session) {
+        console.error("Session 錯誤:", sessionError);
+        setUser(null);
+        setEmployee(null);
+        setLoading(false);
+        return;
+      }
+
       const {
         data: { user: currentUser },
         error: userError,

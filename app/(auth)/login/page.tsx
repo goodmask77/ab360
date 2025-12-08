@@ -17,15 +17,18 @@ export default function LoginPage() {
     setError(null);
 
     try {
-      const { user } = await signIn(email, password);
+      const { data, error: signInError } = await signIn(email, password);
       
-      if (user) {
-        // 登入成功，等待一下讓 session 建立
-        await new Promise((resolve) => setTimeout(resolve, 500));
+      if (signInError) {
+        throw signInError;
+      }
+
+      if (data?.user) {
+        // 登入成功，等待 session 完全建立
+        await new Promise((resolve) => setTimeout(resolve, 1000));
         
         // 重導向到儀表板
-        router.push("/dashboard");
-        router.refresh();
+        window.location.href = "/dashboard";
       }
     } catch (err: any) {
       console.error("登入錯誤:", err);
