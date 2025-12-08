@@ -15,8 +15,11 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
 
   // 如果已登入，導向首頁
+  // 使用 useRef 避免重複重定向
+  const hasRedirectedRef = useRef(false);
   useEffect(() => {
-    if (!authLoading && user) {
+    if (!authLoading && user && !hasRedirectedRef.current) {
+      hasRedirectedRef.current = true;
       router.push("/home");
     }
   }, [user, authLoading, router]);

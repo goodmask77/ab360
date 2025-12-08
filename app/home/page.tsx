@@ -25,11 +25,14 @@ export default function HomePage() {
   const [loadingSessions, setLoadingSessions] = useState(true);
 
   useEffect(() => {
-    if (!loading && employee) {
+    if (loading) return;
+    
+    // 如果有員工資料，載入場次
+    if (employee) {
       loadSessions();
-    } else if (!loading && !employee) {
-      router.push("/login");
     }
+    // 注意：即使沒有員工資料，也不重定向，讓 AuthGuard 處理
+    // 避免與 login 頁面的重定向形成循環
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [employee, loading]);
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/hooks/useSession";
 
@@ -23,18 +23,26 @@ export function AuthGuard({
 }: AuthGuardProps) {
   const { user, employee, loading, isAdmin } = useSession();
   const router = useRouter();
+  const hasRedirectedRef = useRef(false);
 
   useEffect(() => {
     if (loading) return;
+    
+    // 重置重定向標記（當狀態改變時）
+    if (hasRedirectedRef.current && user) {
+      hasRedirectedRef.current = false;
+    }
 
     // 需要登入但未登入
-    if (requireAuth && !user) {
+    if (requireAuth && !user && !hasRedirectedRef.current) {
+      hasRedirectedRef.current = true;
       router.push(redirectTo || "/login");
       return;
     }
 
     // 需要管理員權限但非管理員
-    if (requireAdmin && (!isAdmin || !employee)) {
+    if (requireAdmin && (!isAdmin || !employee) && !hasRedirectedRef.current) {
+      hasRedirectedRef.current = true;
       router.push(redirectTo || "/home");
       return;
     }
