@@ -1,17 +1,151 @@
 "use client";
 
-export default function EmployeeDashboard() {
-  // 假資料 - 之後會從 Supabase 查詢
-  const selfEvaluationTasks = [
-    { id: 1, sessionName: "2025/04 月度 360", status: "pending" },
-    { id: 2, sessionName: "2025/03 月度 360", status: "completed" },
-  ];
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/components/AuthProvider";
+import { createBrowserSupabaseClient } from "@/lib/supabaseClient";
 
-  const peerEvaluationTasks = [
-    { id: 1, targetName: "張三", sessionName: "2025/04 月度 360", status: "pending" },
-    { id: 2, targetName: "李四", sessionName: "2025/04 月度 360", status: "pending" },
-    { id: 3, targetName: "王五", sessionName: "2025/03 月度 360", status: "completed" },
-  ];
+interface EvaluationTask {
+  id: string;
+  session_id: string;
+  session_name: string;
+  target_id: string;
+  target_name: string;
+  type: "self" | "peer" | "manager";
+  status: "pending" | "completed";
+}
+
+export default function EmployeeDashboard() {
+  const { employee, loading: authLoading } = useAuth();
+  const router = useRouter();
+  const [selfTasks, setSelfTasks] = useState<EvaluationTask[]>([]);
+  const [peerTasks, setPeerTasks] = useState<EvaluationTask[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!authLoading && employee) {
+      loadTasks();
+    }
+  }, [employee, authLoading]);
+
+  const loadTasks = async () => {
+    if (!employee) return;
+
+    try {
+      const supabase = createBrowserSupabaseClient();
+
+      // 查詢自評任務
+      const { data: selfRecords, error: selfError } = await supabase
+        .from("evaluation_records")
+        .select(
+          `
+          id,
+          session_id,
+          type,
+          evaluation_sessions!inner(name, status),
+          target_id
+        `
+        )
+        .eq("evaluator_id", employee.id)
+        .eq("target_id", employee.id)
+        .eq("type", "self")
+        .eq("evaluation_sessions.status", "open");
+
+      if (selfError) throw selfError;
+
+      const selfTasksData: EvaluationTask[] =
+        selfRecords?.map((record: any) => ({
+          id: record.id,
+          session_id: record.session_id,
+          session_name: record.evaluation_sessions.name,
+          target_id: record.target_id,
+          target_name: employee.name,
+          type: "self",
+          status: "pending",
+        })) || [];
+
+      // 檢查是否已完成（有 evaluation_scores）
+      for (const task of selfTasksData) {
+        const { data: scores } = await supabase
+          .from("evaluation_scores")
+          .select("id")
+          .eq("record_id", task.id)
+          .limit(1);
+
+        if (scores && scores.length > 0) {
+          task.status = "completed";
+        }
+      }
+
+      setSelfTasks(selfTasksData);
+
+      // 查詢同儕評任務
+      const { data: peerRecords, error: peerError } = await supabase
+        .from("evaluation_records")
+        .select(
+          `
+          id,
+          session_id,
+          type,
+          target_id,
+          evaluation_sessions!inner(name, status)
+        `
+        )
+        .eq("evaluator_id", employee.id)
+        .neq("target_id", employee.id)
+        .eq("type", "peer")
+        .eq("evaluation_sessions.status", "open");
+
+      if (peerError) throw peerError;
+
+      // 取得被評人的姓名
+      const peerTasksData: EvaluationTask[] = [];
+      for (const record of peerRecords || []) {
+        const { data: targetEmployee } = await supabase
+          .from("employees")
+          .select("name")
+          .eq("id", record.target_id)
+          .single();
+
+        peerTasksData.push({
+          id: record.id,
+          session_id: record.session_id,
+          session_name: (record as any).evaluation_sessions.name,
+          target_id: record.target_id,
+          target_name: targetEmployee?.name || "未知",
+          type: "peer",
+          status: "pending",
+        });
+      }
+
+      // 檢查是否已完成
+      for (const task of peerTasksData) {
+        const { data: scores } = await supabase
+          .from("evaluation_scores")
+          .select("id")
+          .eq("record_id", task.id)
+          .limit(1);
+
+        if (scores && scores.length > 0) {
+          task.status = "completed";
+        }
+      }
+
+      setPeerTasks(peerTasksData);
+    } catch (error) {
+      console.error("載入任務失敗:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (authLoading || loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-gray-500">載入中...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -20,17 +154,17 @@ export default function EmployeeDashboard() {
       {/* 自評任務區塊 */}
       <section className="bg-white rounded-lg shadow p-6">
         <h2 className="text-xl font-semibold text-gray-800 mb-4">自評任務</h2>
-        {selfEvaluationTasks.length === 0 ? (
+        {selfTasks.length === 0 ? (
           <p className="text-gray-500">目前沒有待處理的自評任務</p>
         ) : (
           <ul className="space-y-3">
-            {selfEvaluationTasks.map((task) => (
+            {selfTasks.map((task) => (
               <li
                 key={task.id}
                 className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50"
               >
                 <div>
-                  <span className="font-medium text-gray-900">{task.sessionName}</span>
+                  <span className="font-medium text-gray-900">{task.session_name}</span>
                   <span
                     className={`ml-3 px-2 py-1 text-xs rounded ${
                       task.status === "pending"
@@ -42,7 +176,10 @@ export default function EmployeeDashboard() {
                   </span>
                 </div>
                 {task.status === "pending" && (
-                  <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm">
+                  <button
+                    onClick={() => router.push(`/evaluate/${task.id}?type=self`)}
+                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm"
+                  >
                     開始填寫
                   </button>
                 )}
@@ -55,18 +192,18 @@ export default function EmployeeDashboard() {
       {/* 需要評價的夥伴列表 */}
       <section className="bg-white rounded-lg shadow p-6">
         <h2 className="text-xl font-semibold text-gray-800 mb-4">需要你評價的夥伴</h2>
-        {peerEvaluationTasks.length === 0 ? (
+        {peerTasks.length === 0 ? (
           <p className="text-gray-500">目前沒有待評價的夥伴</p>
         ) : (
           <ul className="space-y-3">
-            {peerEvaluationTasks.map((task) => (
+            {peerTasks.map((task) => (
               <li
                 key={task.id}
                 className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50"
               >
                 <div>
-                  <span className="font-medium text-gray-900">{task.targetName}</span>
-                  <span className="ml-3 text-sm text-gray-500">{task.sessionName}</span>
+                  <span className="font-medium text-gray-900">{task.target_name}</span>
+                  <span className="ml-3 text-sm text-gray-500">{task.session_name}</span>
                   <span
                     className={`ml-3 px-2 py-1 text-xs rounded ${
                       task.status === "pending"
@@ -78,7 +215,10 @@ export default function EmployeeDashboard() {
                   </span>
                 </div>
                 {task.status === "pending" && (
-                  <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm">
+                  <button
+                    onClick={() => router.push(`/evaluate/${task.id}?type=peer`)}
+                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm"
+                  >
                     開始評價
                   </button>
                 )}
@@ -90,4 +230,3 @@ export default function EmployeeDashboard() {
     </div>
   );
 }
-
