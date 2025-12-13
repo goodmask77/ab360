@@ -32,10 +32,10 @@ export default function NavBar() {
                 {employee?.role && (
                   <span className="ml-2 text-xs bg-blue-600 px-2 py-1 rounded">
                     {employee.role === "owner"
-                      ? "擁有者"
-                      : employee.role === "manager"
                       ? "管理員"
-                      : "員工"}
+                      : employee.role === "duty"
+                      ? "管理員"
+                      : "夥伴"}
                   </span>
                 )}
               </span>
