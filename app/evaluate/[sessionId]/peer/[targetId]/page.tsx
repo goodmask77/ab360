@@ -395,7 +395,7 @@ export default function PeerEvaluationPage() {
                   }
                   placeholder="請輸入你的想法..."
                   rows={5}
-                  className="w-full px-4 py-3 text-base border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none resize-none"
+                  className="w-full px-4 py-3 text-base text-gray-900 bg-white border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none resize-none placeholder:text-gray-400"
                 />
               )}
             </div>

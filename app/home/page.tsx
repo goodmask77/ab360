@@ -223,7 +223,7 @@ export default function HomePage() {
 
                       {/* 開始評鑑按鈕 */}
                       <Link
-                        href={`/evaluate/${session.id}/self`}
+                        href={`/evaluate/${session.id}`}
                         className="block w-full bg-blue-600 text-white text-center py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium"
                       >
                         開始評鑑
