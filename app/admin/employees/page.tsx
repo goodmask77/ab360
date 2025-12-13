@@ -9,6 +9,8 @@ import { getSessionAssignments } from "@/lib/api/assignments";
 import MobileLayout from "@/components/MobileLayout";
 import { AuthGuard } from "@/lib/auth-guard";
 import Badge from "@/components/Badge";
+import Card from "@/components/Card";
+import StatusBadge from "@/components/StatusBadge";
 
 interface EmployeeProgress {
   id: string;
@@ -179,7 +181,7 @@ export default function AdminEmployeesPage() {
       {loading || loadingData ? (
         <MobileLayout title="員工進度">
           <div className="flex items-center justify-center min-h-[60vh]">
-            <div className="text-gray-500">載入中...</div>
+            <div className="text-text-secondary">載入中...</div>
           </div>
         </MobileLayout>
       ) : (
@@ -187,105 +189,106 @@ export default function AdminEmployeesPage() {
           <div className="space-y-4">
             {/* 場次選擇 */}
             {sessions.length > 0 && (
-              <div className="bg-white rounded-xl p-4 border border-gray-200">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  選擇場次
-                </label>
-                <select
-                  value={selectedSessionId || ""}
-                  onChange={(e) => handleSessionChange(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
-                >
-                  <option value="">-- 選擇場次 --</option>
-                  {sessions.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.name} ({s.status === "open" ? "進行中" : s.status === "closed" ? "已結束" : "草稿"})
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <Card>
+                <div className="p-4">
+                  <label className="block text-sm font-medium text-text-primary mb-2">
+                    選擇場次
+                  </label>
+                  <select
+                    value={selectedSessionId || ""}
+                    onChange={(e) => handleSessionChange(e.target.value)}
+                    className="input"
+                  >
+                    <option value="">-- 選擇場次 --</option>
+                    {sessions.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name} ({s.status === "open" ? "進行中" : s.status === "closed" ? "已結束" : "草稿"})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </Card>
             )}
 
             {/* 員工列表 */}
             {employees.length === 0 ? (
-              <div className="bg-white rounded-xl p-6 text-center border border-gray-200">
-                <p className="text-gray-500">目前沒有員工資料</p>
-              </div>
+              <Card>
+                <div className="p-6 text-center">
+                  <p className="text-text-secondary">目前沒有員工資料</p>
+                </div>
+              </Card>
             ) : (
               <div className="space-y-3">
                 {employees.map((employee) => (
-                  <Link
-                    key={employee.id}
-                    href={`/admin/employees/${employee.id}`}
-                    className="block bg-white rounded-xl p-5 border-2 border-gray-200 hover:border-emerald-300 hover:shadow-lg transition-all"
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex-1">
-                        <h3 className="font-bold text-gray-900 text-lg mb-1">
-                          {employee.name}
-                        </h3>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <Badge
-                            variant={
-                              employee.department === "front"
-                                ? "info"
-                                : employee.department === "back"
-                                ? "primary"
-                                : "secondary"
-                            }
-                            size="sm"
-                          >
-                            {employee.department === "front"
-                              ? "外場"
-                              : employee.department === "back"
-                              ? "內場"
-                              : employee.department || "未設定"}
-                          </Badge>
-                          {employee.role === "manager" && (
-                            <Badge variant="warning" size="sm">
-                              管理者
-                            </Badge>
-                          )}
-                          {employee.role === "owner" && (
-                            <Badge variant="primary" size="sm">
-                              負責人
-                            </Badge>
-                          )}
+                  <Link key={employee.id} href={`/admin/employees/${employee.id}`}>
+                    <Card hover>
+                      <div className="p-5">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex-1">
+                            <h3 className="font-bold text-text-primary text-lg mb-1">
+                              {employee.name}
+                            </h3>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <Badge
+                                variant={
+                                  employee.department === "front"
+                                    ? "info"
+                                    : employee.department === "back"
+                                    ? "primary"
+                                    : "secondary"
+                                }
+                                size="sm"
+                              >
+                                {employee.department === "front"
+                                  ? "外場"
+                                  : employee.department === "back"
+                                  ? "內場"
+                                  : employee.department || "未設定"}
+                              </Badge>
+                              {employee.role === "manager" && (
+                                <Badge variant="warning" size="sm">
+                                  管理者
+                                </Badge>
+                              )}
+                              {employee.role === "owner" && (
+                                <Badge variant="primary" size="sm">
+                                  負責人
+                                </Badge>
+                              )}
+                            </div>
+                            <p className="text-xs text-text-muted mt-1">{employee.email}</p>
+                          </div>
                         </div>
-                        <p className="text-xs text-gray-500 mt-1">{employee.email}</p>
+
+                        {selectedSessionId && (
+                          <div className="space-y-2 pt-3 border-t border-dark-border">
+                            {/* 自評狀態 */}
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-text-secondary">自評</span>
+                              <StatusBadge status={employee.self_completed ? "success" : "warning"}>
+                                {employee.self_completed ? "✅ 已完成" : "⏳ 待處理"}
+                              </StatusBadge>
+                            </div>
+
+                            {/* 互評進度 */}
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-text-secondary">互評</span>
+                              <span className="text-text-primary font-medium">
+                                已完成 {employee.peer_completed} / {employee.peer_total}
+                              </span>
+                            </div>
+
+                            {/* 收到回饋 */}
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-text-secondary">收到回饋</span>
+                              <StatusBadge status="info">
+                                {employee.received_feedback} 份
+                              </StatusBadge>
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    </div>
-
-                    {selectedSessionId && (
-                      <div className="space-y-2 pt-3 border-t border-gray-200">
-                        {/* 自評狀態 */}
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-600">自評</span>
-                          <Badge
-                            variant={employee.self_completed ? "success" : "warning"}
-                            size="sm"
-                          >
-                            {employee.self_completed ? "✅ 已完成" : "⏳ 待處理"}
-                          </Badge>
-                        </div>
-
-                        {/* 互評進度 */}
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-600">互評</span>
-                          <span className="text-gray-900 font-medium">
-                            已完成 {employee.peer_completed} / {employee.peer_total}
-                          </span>
-                        </div>
-
-                        {/* 收到回饋 */}
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-600">收到回饋</span>
-                          <Badge variant="info" size="sm">
-                            {employee.received_feedback} 份
-                          </Badge>
-                        </div>
-                      </div>
-                    )}
+                    </Card>
                   </Link>
                 ))}
               </div>
