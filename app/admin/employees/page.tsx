@@ -231,7 +231,7 @@ export default function AdminEmployeesPage() {
                                 ? "info"
                                 : employee.department === "back"
                                 ? "primary"
-                                : "default"
+                                : "secondary"
                             }
                             size="sm"
                           >

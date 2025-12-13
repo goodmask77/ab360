@@ -29,7 +29,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     if (!authLoading) {
-      if (!employee || (employee.role !== "manager" && employee.role !== "owner")) {
+      if (!employee || (employee.role !== "owner")) {
         router.push("/dashboard");
         return;
       }
