@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     });
 
     // 檢查 Auth 使用者是否存在
-    const { data: existingUser } = await supabase.auth.admin.getUserByEmail(email);
+    const { data: existingUser } = await supabase.auth.admin.listUsers(email);
 
     let userId: string;
 
