@@ -7,10 +7,6 @@ interface AchievementBadgeProps {
   unlocked: boolean;
 }
 
-/**
- * AchievementBadge 元件
- * 顯示成就徽章
- */
 export default function AchievementBadge({
   icon,
   title,
@@ -19,17 +15,15 @@ export default function AchievementBadge({
 }: AchievementBadgeProps) {
   return (
     <div
-      className={`relative p-4 rounded-xl border-2 transition-all ${
+      className={`rounded-xl p-4 border-2 transition-all ${
         unlocked
-          ? "bg-gradient-to-br from-amber-50 to-orange-50 border-amber-300 shadow-md"
+          ? "bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-300 shadow-md"
           : "bg-gray-50 border-gray-200 opacity-60"
       }`}
     >
       <div className="flex items-start gap-3">
         <div
-          className={`text-4xl ${unlocked ? "" : "grayscale opacity-50"}`}
-          role="img"
-          aria-label={title}
+          className={`text-3xl ${unlocked ? "" : "grayscale opacity-50"}`}
         >
           {icon}
         </div>
@@ -50,13 +44,9 @@ export default function AchievementBadge({
           </p>
         </div>
         {unlocked && (
-          <div className="absolute top-2 right-2">
-            <span className="text-emerald-500 text-xl">✓</span>
-          </div>
+          <div className="text-green-500 text-xl">✓</div>
         )}
       </div>
     </div>
   );
 }
-
-

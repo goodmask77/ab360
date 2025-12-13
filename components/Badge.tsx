@@ -2,41 +2,37 @@
 
 interface BadgeProps {
   children: React.ReactNode;
-  variant?: "default" | "success" | "warning" | "info" | "primary";
+  variant?: "primary" | "secondary" | "success" | "warning" | "danger" | "info";
   size?: "sm" | "md" | "lg";
   className?: string;
 }
 
-/**
- * Badge 元件
- * 用於顯示徽章、標籤等
- */
+const variantStyles = {
+  primary: "bg-blue-100 text-blue-800 border-blue-200",
+  secondary: "bg-gray-100 text-gray-800 border-gray-200",
+  success: "bg-green-100 text-green-800 border-green-200",
+  warning: "bg-yellow-100 text-yellow-800 border-yellow-200",
+  danger: "bg-red-100 text-red-800 border-red-200",
+  info: "bg-cyan-100 text-cyan-800 border-cyan-200",
+};
+
+const sizeStyles = {
+  sm: "text-xs px-2 py-1",
+  md: "text-sm px-3 py-1.5",
+  lg: "text-base px-4 py-2",
+};
+
 export default function Badge({
   children,
-  variant = "default",
+  variant = "primary",
   size = "md",
   className = "",
 }: BadgeProps) {
-  const variantStyles = {
-    default: "bg-gray-100 text-gray-800",
-    success: "bg-emerald-100 text-emerald-800",
-    warning: "bg-amber-100 text-amber-800",
-    info: "bg-blue-100 text-blue-800",
-    primary: "bg-orange-100 text-orange-800",
-  };
-
-  const sizeStyles = {
-    sm: "px-2 py-0.5 text-xs",
-    md: "px-3 py-1 text-sm",
-    lg: "px-4 py-1.5 text-base",
-  };
-
   return (
     <span
-      className={`inline-flex items-center rounded-full font-medium ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}
+      className={`inline-flex items-center font-medium rounded-full border ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}
     >
       {children}
     </span>
   );
 }
-
