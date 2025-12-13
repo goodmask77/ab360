@@ -38,8 +38,45 @@ export default function TasksPage() {
     if (!employee) return;
 
     try {
-      const assignments = await getUserAssignments(employee.id);
       const supabase = createBrowserSupabaseClient();
+      
+      // 先取得所有進行中的場次
+      const { data: openSessions } = await supabase
+        .from("evaluation_sessions")
+        .select("id, name, status")
+        .eq("status", "open");
+
+      // 為每個進行中的場次，確保該員工有自評 assignment
+      if (openSessions && openSessions.length > 0) {
+        for (const session of openSessions) {
+          // 檢查是否已有自評 assignment
+          const { data: existingSelfAssignment } = await supabase
+            .from("evaluation_assignments")
+            .select("id")
+            .eq("session_id", session.id)
+            .eq("evaluator_id", employee.id)
+            .eq("target_id", employee.id)
+            .eq("is_self", true)
+            .maybeSingle();
+
+          // 如果沒有，自動建立自評 assignment
+          if (!existingSelfAssignment) {
+            await supabase
+              .from("evaluation_assignments")
+              .insert({
+                session_id: session.id,
+                evaluator_id: employee.id,
+                target_id: employee.id,
+                is_self: true,
+                status: "pending",
+              })
+              .select();
+          }
+        }
+      }
+
+      // 取得所有 assignments
+      const assignments = await getUserAssignments(employee.id);
 
       const tasksWithDetails: TaskWithTarget[] = [];
       const completedTasksWithDetails: TaskWithTarget[] = [];
