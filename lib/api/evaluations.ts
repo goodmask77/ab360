@@ -112,22 +112,54 @@ export async function submitEvaluation(input: SubmitEvaluationInput): Promise<vo
     }
   }
 
-  // 更新 assignment 狀態
-  const { error: assignmentError } = await supabase
+  // 更新或創建 assignment 狀態
+  // 先檢查是否存在 assignment
+  const { data: existingAssignment, error: checkAssignmentError } = await supabase
     .from("evaluation_assignments")
-    .update({
-      status: "completed",
-      completed_at: new Date().toISOString(),
-    })
+    .select("id")
     .eq("session_id", input.session_id)
     .eq("evaluator_id", evaluator_id)
     .eq("target_id", input.target_id)
     .eq("is_self", input.is_self)
-    .select();
+    .maybeSingle();
 
-  if (assignmentError) {
-    console.error("[API ERROR] update evaluation assignment:", assignmentError);
-    throw assignmentError;
+  if (checkAssignmentError && checkAssignmentError.code !== "PGRST116") {
+    console.error("[API ERROR] check evaluation assignment:", checkAssignmentError);
+  }
+
+  if (existingAssignment) {
+    // 更新現有 assignment
+    const { error: assignmentError } = await supabase
+      .from("evaluation_assignments")
+      .update({
+        status: "completed",
+        completed_at: new Date().toISOString(),
+      })
+      .eq("id", existingAssignment.id)
+      .select();
+
+    if (assignmentError) {
+      console.error("[API ERROR] update evaluation assignment:", assignmentError);
+      // 不拋出錯誤，因為評鑑記錄已經建立
+    }
+  } else {
+    // 創建新的 assignment（允許動態互評）
+    const { error: createAssignmentError } = await supabase
+      .from("evaluation_assignments")
+      .insert({
+        session_id: input.session_id,
+        evaluator_id,
+        target_id: input.target_id,
+        is_self: input.is_self,
+        status: "completed",
+        completed_at: new Date().toISOString(),
+      })
+      .select();
+
+    if (createAssignmentError) {
+      console.error("[API ERROR] create evaluation assignment:", createAssignmentError);
+      // 不拋出錯誤，因為評鑑記錄已經建立
+    }
   }
 }
 

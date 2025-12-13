@@ -2,24 +2,27 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import Link from "next/link";
 import { useSession } from "@/lib/hooks/useSession";
 import { getSessionById, type EvaluationSession } from "@/lib/api/sessions";
 import { createBrowserSupabaseClient } from "@/lib/supabaseClient";
 import MobileLayout from "@/components/MobileLayout";
 import { AuthGuard } from "@/lib/auth-guard";
+import Card from "@/components/Card";
 
-export default function EvaluationTypePage() {
+interface Employee {
+  id: string;
+  name: string;
+  department: string | null;
+  email: string;
+}
+
+export default function EvaluationTypeSelectionPage() {
   const params = useParams();
   const router = useRouter();
   const { employee, loading } = useSession();
   const sessionId = params.sessionId as string;
   const [session, setSession] = useState<EvaluationSession | null>(null);
-  const [peerTargets, setPeerTargets] = useState<Array<{
-    id: string;
-    name: string;
-    department: string;
-  }>>([]);
+  const [allEmployees, setAllEmployees] = useState<Employee[]>([]);
   const [loadingData, setLoadingData] = useState(true);
 
   useEffect(() => {
@@ -32,174 +35,134 @@ export default function EvaluationTypePage() {
   const loadData = async () => {
     try {
       const supabase = createBrowserSupabaseClient();
-      
-      // 取得場次資訊
-      const sessionData = await getSessionById(sessionId);
-      setSession(sessionData);
-
-      // 取得該用戶的互評任務（同部門的夥伴）
-      const { data: assignments } = await supabase
-        .from("evaluation_assignments")
-        .select("target_id")
-        .eq("session_id", sessionId)
-        .eq("evaluator_id", employee!.id)
-        .eq("is_self", false)
-        .eq("status", "pending");
-
-      if (assignments && assignments.length > 0) {
-        // 取得所有目標員工資訊
-        const targetIds = assignments.map(a => a.target_id);
-        const { data: targets } = await supabase
+      const [sessionData, { data: employeesData, error: employeesError }] = await Promise.all([
+        getSessionById(sessionId),
+        supabase
           .from("employees")
-          .select("id, name, department")
-          .in("id", targetIds);
+          .select("id, name, department, email")
+          .neq("id", employee?.id || ""), // 排除自己
+      ]);
 
-        setPeerTargets(targets || []);
-      } else {
-        // 如果沒有 assignments，自動建立自評 assignment
-        const { data: existingSelfAssignment } = await supabase
-          .from("evaluation_assignments")
-          .select("id")
-          .eq("session_id", sessionId)
-          .eq("evaluator_id", employee!.id)
-          .eq("target_id", employee!.id)
-          .eq("is_self", true)
-          .maybeSingle();
-
-        if (!existingSelfAssignment) {
-          await supabase
-            .from("evaluation_assignments")
-            .insert({
-              session_id: sessionId,
-              evaluator_id: employee!.id,
-              target_id: employee!.id,
-              is_self: true,
-              status: "pending",
-            });
-        }
+      if (employeesError) {
+        console.error("[API ERROR] get employees:", employeesError);
       }
+
+      setSession(sessionData);
+      setAllEmployees(employeesData || []);
     } catch (error) {
-      console.error("[API ERROR] load evaluation type data:", error);
+      console.error("[API ERROR] load evaluation type selection data:", error);
     } finally {
       setLoadingData(false);
     }
   };
 
-  if (loading || loadingData) {
-    return (
-      <MobileLayout title="選擇評鑑類型">
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="text-gray-500">載入中...</div>
-        </div>
-      </MobileLayout>
-    );
-  }
+  const formatDate = (date: string | null) => {
+    if (!date) return "";
+    return new Date(date).toLocaleDateString("zh-TW", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+  };
 
-  if (!session) {
-    return (
-      <MobileLayout title="選擇評鑑類型">
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="text-gray-500">場次不存在</div>
-        </div>
-      </MobileLayout>
-    );
-  }
+  const handleSelfEvaluation = () => {
+    router.push(`/evaluate/${sessionId}/self`);
+  };
+
+  const handlePeerEvaluation = (targetId: string) => {
+    router.push(`/evaluate/${sessionId}/peer/${targetId}`);
+  };
 
   return (
     <AuthGuard requireAuth={true}>
       <MobileLayout
-        title={session.name}
-        showBackButton={true}
+        title={session?.name || "評鑑"}
+        showHomeButton={true}
         onBack={() => router.push("/home")}
       >
-        <div className="space-y-6">
-          {/* 場次資訊 */}
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-200">
-            <h2 className="font-semibold text-gray-900 mb-1">{session.name}</h2>
-            {session.start_at && session.end_at && (
-              <p className="text-sm text-gray-600">
-                {new Date(session.start_at).toLocaleDateString("zh-TW")} ~{" "}
-                {new Date(session.end_at).toLocaleDateString("zh-TW")}
-              </p>
-            )}
+        {loadingData ? (
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <div className="text-gray-500">載入中...</div>
           </div>
-
-          {/* 選擇評鑑類型 */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900">選擇評鑑類型</h3>
-
-            {/* 自評選項 */}
-            <Link
-              href={`/evaluate/${sessionId}/self`}
-              className="block bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border-2 border-blue-200 hover:border-blue-400 hover:shadow-lg transition-all active:scale-[0.98]"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className="text-3xl">📝</span>
-                    <div>
-                      <h4 className="font-bold text-gray-900 text-lg">自評</h4>
-                      <p className="text-sm text-gray-600">評鑑自己的表現</p>
-                    </div>
-                  </div>
-                </div>
-                <span className="text-2xl">→</span>
+        ) : !session ? (
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <div className="text-gray-500">找不到評鑑場次</div>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {/* 場次資訊卡片 */}
+            <Card className="p-4">
+              <div className="text-lg font-semibold text-foreground mb-2">
+                {session.name}
               </div>
-            </Link>
-
-            {/* 互評選項 */}
-            {peerTargets.length > 0 ? (
-              <div>
-                <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                  <span>🤝</span>
-                  <span>互評 - 選擇夥伴</span>
-                </h4>
-                <div className="space-y-3">
-                  {peerTargets.map((target) => (
-                    <Link
-                      key={target.id}
-                      href={`/evaluate/${sessionId}/peer/${target.id}`}
-                      className="block bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-5 border-2 border-emerald-200 hover:border-emerald-400 hover:shadow-lg transition-all active:scale-[0.98]"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <h5 className="font-bold text-gray-900 text-lg mb-1">
-                            {target.name}
-                          </h5>
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs px-2 py-1 bg-emerald-100 text-emerald-800 rounded">
-                              {target.department === "front"
-                                ? "外場"
-                                : target.department === "back"
-                                ? "內場"
-                                : target.department}
-                            </span>
-                            <span className="text-xs text-gray-500">互評</span>
-                          </div>
-                        </div>
-                        <span className="text-2xl">→</span>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
+              <div className="text-sm text-muted">
+                {formatDate(session.start_at)} ~ {formatDate(session.end_at)}
               </div>
-            ) : (
-              <div className="bg-gray-50 rounded-xl p-5 border border-gray-200">
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">🤝</span>
+            </Card>
+
+            {/* 選擇評鑑類型 */}
+            <div>
+              <h2 className="text-lg font-semibold text-foreground mb-4">選擇評鑑類型</h2>
+
+              {/* 自評選項 */}
+              <Card
+                className="p-4 mb-4 cursor-pointer card-hover"
+                onClick={handleSelfEvaluation}
+              >
+                <div className="flex items-center gap-4">
+                  <div className="text-3xl">📝</div>
                   <div className="flex-1">
-                    <h4 className="font-semibold text-gray-700 mb-1">互評</h4>
-                    <p className="text-sm text-gray-500">
-                      目前沒有待評鑑的夥伴，或所有互評任務已完成
-                    </p>
+                    <div className="text-lg font-semibold text-foreground mb-1">自評</div>
+                    <div className="text-sm text-muted">評鑑自己的表現</div>
                   </div>
+                  <div className="text-muted">→</div>
                 </div>
+              </Card>
+
+              {/* 互評選項 */}
+              <div>
+                <h3 className="text-base font-medium text-foreground mb-3">互評夥伴</h3>
+                {allEmployees.length === 0 ? (
+                  <Card className="p-4">
+                    <div className="text-center text-muted">
+                      目前沒有其他夥伴可以評鑑
+                    </div>
+                  </Card>
+                ) : (
+                  <div className="space-y-3">
+                    {allEmployees.map((emp) => (
+                      <Card
+                        key={emp.id}
+                        className="p-4 cursor-pointer card-hover"
+                        onClick={() => handlePeerEvaluation(emp.id)}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-action/20 flex items-center justify-center text-action font-semibold">
+                              {emp.name.charAt(0)}
+                            </div>
+                            <div>
+                              <div className="font-semibold text-foreground">{emp.name}</div>
+                              <div className="text-sm text-muted">
+                                {emp.department === "front"
+                                  ? "外場"
+                                  : emp.department === "back"
+                                  ? "內場"
+                                  : emp.department || "未設定"}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-muted">→</div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                )}
               </div>
-            )}
+            </div>
           </div>
-        </div>
+        )}
       </MobileLayout>
     </AuthGuard>
   );
 }
-
