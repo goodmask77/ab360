@@ -29,12 +29,13 @@ export async function POST(request: NextRequest) {
     });
 
     // 檢查 Auth 使用者是否存在
-    const { data: existingUser } = await supabase.auth.admin.listUsers(email);
+    const { data: usersList } = await supabase.auth.admin.listUsers();
+    const existingUser = usersList?.users?.find(u => u.email === email);
 
     let userId: string;
 
-    if (existingUser?.user) {
-      userId = existingUser.user.id;
+    if (existingUser) {
+      userId = existingUser.id;
     } else {
       // 建立新使用者
       const { data: newUser, error: createError } = await supabase.auth.admin.createUser({

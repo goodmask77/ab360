@@ -36,13 +36,14 @@ export async function POST(request: NextRequest) {
     });
 
     // 檢查使用者是否存在
-    const { data: existingUser } = await supabase.auth.admin.listUsers(email);
+    const { data: usersList } = await supabase.auth.admin.listUsers();
+    const existingUser = usersList?.users?.find(u => u.email === email);
 
     let userId: string;
 
-    if (existingUser?.user) {
+    if (existingUser) {
       // 使用者已存在
-      userId = existingUser.user.id;
+      userId = existingUser.id;
     } else {
       // 建立新使用者（不需要密碼，自動確認）
       const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
