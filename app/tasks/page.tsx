@@ -89,13 +89,13 @@ export default function TasksPage() {
   return (
     <AuthGuard requireAuth={true}>
       {loading || loadingTasks ? (
-        <MobileLayout title="我的任務">
+        <MobileLayout title="我的任務" showHomeButton={true}>
           <div className="flex items-center justify-center min-h-[60vh]">
             <div className="text-gray-500">載入中...</div>
           </div>
         </MobileLayout>
       ) : (
-        <MobileLayout title="我的任務">
+        <MobileLayout title="我的任務" showHomeButton={true}>
           <div className="space-y-6">
             {/* 歡迎訊息 */}
             {employee && (

@@ -90,13 +90,13 @@ export default function FeedbackPage() {
   return (
     <AuthGuard requireAuth={true}>
       {loading || loadingSessions ? (
-        <MobileLayout title="我的回饋">
+        <MobileLayout title="我的回饋" showHomeButton={true}>
           <div className="flex items-center justify-center min-h-[60vh]">
             <div className="text-gray-500">載入中...</div>
           </div>
         </MobileLayout>
       ) : (
-        <MobileLayout title="我的回饋">
+        <MobileLayout title="我的回饋" showHomeButton={true}>
           <div className="space-y-4">
             {sessions.length === 0 ? (
               <div className="bg-white rounded-lg shadow-sm p-6 text-center">

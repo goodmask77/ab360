@@ -6,32 +6,67 @@ export interface Employee {
   auth_user_id: string;
   name: string;
   email: string;
-  role: "staff" | "manager" | "owner";
+  role: "staff" | "duty" | "owner";
   department: string | null;
   created_at: string;
 }
 
 /**
- * 登入（Email + Password）
+ * 登入（只需要 Email，不需要密碼）
  */
-export async function signIn(email: string, password: string) {
-  const supabase = createBrowserSupabaseClient();
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
+export async function signIn(email: string) {
+  try {
+    // 呼叫後端 API 來建立 session
+    const response = await fetch("/api/auth/login-without-password", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email }),
+    });
 
-  if (error) {
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.error || "登入失敗");
+    }
+
+    // 使用返回的 token 來設定 session
+    const supabase = createBrowserSupabaseClient();
+    
+    if (result.useMagicLink && result.actionLink) {
+      // 如果使用 magic link，直接導向
+      window.location.href = result.actionLink;
+      return {
+        user: null,
+        session: null,
+        error: null,
+      };
+    } else if (result.accessToken) {
+      // 使用 access token 來設定 session
+      const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
+        access_token: result.accessToken,
+        refresh_token: result.refreshToken || "",
+      });
+
+      if (sessionError) {
+        console.error("設定 session 錯誤:", sessionError);
+        throw sessionError;
+      }
+
+      return {
+        user: sessionData.user,
+        session: sessionData.session,
+        error: null,
+      };
+    } else {
+      // 如果沒有 token，嘗試使用 magic link
+      throw new Error("無法取得登入 token");
+    }
+  } catch (error: any) {
     console.error("登入錯誤:", error);
     throw error;
   }
-
-  // 返回完整的登入結果
-  return {
-    user: data.user,
-    session: data.session,
-    error: null,
-  };
 }
 
 /**
@@ -79,11 +114,11 @@ export async function getCurrentEmployee(): Promise<Employee | null> {
 }
 
 /**
- * 檢查使用者是否有管理員權限
+ * 檢查使用者是否有管理員權限（只有 owner 是管理員）
  */
 export async function isAdmin(): Promise<boolean> {
   const employee = await getCurrentEmployee();
-  return employee?.role === "manager" || employee?.role === "owner";
+  return employee?.role === "owner";
 }
 
 /**

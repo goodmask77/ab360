@@ -11,8 +11,9 @@ export function useSession() {
     user,
     employee,
     loading,
-    isAdmin: employee?.role === "manager" || employee?.role === "owner",
+    isAdmin: employee?.role === "owner",
     isOwner: employee?.role === "owner",
+    isDuty: employee?.role === "duty",
     isStaff: employee?.role === "staff",
     refresh,
   };

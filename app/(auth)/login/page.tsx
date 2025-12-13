@@ -10,7 +10,6 @@ export default function LoginPage() {
   const { user, loading: authLoading } = useSession();
   const router = useRouter();
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -27,19 +26,22 @@ export default function LoginPage() {
     setError(null);
 
     try {
-      const result = await signIn(email, password);
+      const result = await signIn(email);
       
       if (result.error) {
         throw result.error;
       }
 
       if (result.user || result.session) {
-        // 登入成功，使用 router.replace 避免歷史記錄堆疊
+        // 登入成功，等待 session 完全建立
+        await new Promise((resolve) => setTimeout(resolve, 300));
+        
+        // 重導向到首頁
         router.replace("/home");
       }
     } catch (err: any) {
       console.error("登入錯誤:", err);
-      setError(err.message || "登入失敗，請檢查帳號密碼");
+      setError(err.message || "登入失敗，請檢查 email 是否正確");
     } finally {
       setLoading(false);
     }
@@ -76,23 +78,6 @@ export default function LoginPage() {
               />
             </div>
 
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                密碼
-              </label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="請輸入密碼"
-                required
-                className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-              />
-            </div>
 
             <button
               type="submit"
