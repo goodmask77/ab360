@@ -80,12 +80,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    if (employeesError) {
-      console.error("[API ERROR] create employees:", employeesError);
-      throw employeesError;
-    }
-
-    if (!createdEmployees || createdEmployees.length === 0) {
+    if (createdEmployees.length === 0) {
       throw new Error("無法建立員工資料");
     }
 
