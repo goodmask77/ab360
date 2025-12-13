@@ -232,7 +232,7 @@ export default function LeaderboardPage() {
                                   ? "info"
                                   : entry.department === "back"
                                   ? "primary"
-                                  : "default"
+                                  : "secondary"
                               }
                               size="sm"
                             >
@@ -265,7 +265,7 @@ export default function LeaderboardPage() {
                             .map(([catKey, points]) => {
                               const cat = categories.find((c) => c.key === catKey);
                               return (
-                                <Badge key={catKey} variant="default" size="sm">
+                                <Badge key={catKey} variant="secondary" size="sm">
                                   {cat?.name || catKey}: {points} 點
                                 </Badge>
                               );
