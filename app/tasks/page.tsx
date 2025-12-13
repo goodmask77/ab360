@@ -128,7 +128,7 @@ export default function TasksPage() {
       {loading || loadingTasks ? (
         <MobileLayout title="我的任務" showHomeButton={true}>
           <div className="flex items-center justify-center min-h-[60vh]">
-            <div className="text-gray-500">載入中...</div>
+            <div className="text-gray-400">載入中...</div>
           </div>
         </MobileLayout>
       ) : (
@@ -136,8 +136,8 @@ export default function TasksPage() {
           <div className="space-y-6">
             {/* 歡迎訊息 */}
             {employee && (
-              <div className="bg-gradient-to-r from-emerald-50 to-blue-50 rounded-xl p-4 border border-emerald-200">
-                <p className="text-sm text-gray-700">
+              <div className="card-tech p-4 border-gold/30">
+                <p className="text-sm text-gray-300">
                   👋 嗨 {employee.name}！感謝你為夥伴給出回饋，這會幫助大家一起進步。
                 </p>
               </div>
@@ -146,7 +146,7 @@ export default function TasksPage() {
             {/* 成就徽章 */}
             {completedTasks.length > 0 && (
               <div>
-                <h2 className="text-lg font-semibold text-gray-900 mb-3">🏆 你的成就</h2>
+                <h2 className="text-lg font-semibold text-gray-100 mb-3">🏆 你的成就</h2>
                 <div className="space-y-3">
                   <AchievementBadge
                     icon="✅"
@@ -172,14 +172,14 @@ export default function TasksPage() {
 
             {/* 待完成任務統計 */}
             {(selfTasks.length > 0 || peerTasks.length > 0) && (
-              <div className="bg-white rounded-xl p-4 border border-gray-200">
+              <div className="card-tech p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-gray-700">待完成任務</span>
+                  <span className="text-sm font-medium text-gray-300">待完成任務</span>
                   <Badge variant="warning" size="sm">
                     {selfTasks.length + peerTasks.length} 個
                   </Badge>
                 </div>
-                <div className="text-xs text-gray-500">
+                <div className="text-xs text-gray-400">
                   完成所有任務後，就能看到夥伴給你的回饋囉！
                 </div>
               </div>
@@ -188,7 +188,7 @@ export default function TasksPage() {
             {/* 自評任務 */}
             {selfTasks.length > 0 && (
               <div>
-                <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <h2 className="text-lg font-semibold text-gray-100 mb-4 flex items-center gap-2">
                   <span>📝</span>
                   <span>自評任務</span>
                 </h2>
@@ -197,14 +197,14 @@ export default function TasksPage() {
                     <Link
                       key={task.id}
                       href={`/evaluate/${task.session_id}/self`}
-                      className="block bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-5 border-2 border-blue-200 hover:border-blue-400 hover:shadow-lg transition-all active:scale-[0.98]"
+                      className="block card-tech p-5 hover:border-gold/50 transition-all active:scale-[0.98]"
                     >
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex-1">
-                          <h3 className="font-bold text-gray-900 mb-1 text-lg">
+                          <h3 className="font-bold text-gray-100 mb-1 text-lg">
                             {task.session_name}
                           </h3>
-                          <p className="text-sm text-gray-600">自我評鑑</p>
+                          <p className="text-sm text-gray-400">自我評鑑</p>
                         </div>
                         <Badge variant="primary" size="sm">
                           去填寫
@@ -222,7 +222,7 @@ export default function TasksPage() {
             {/* 互評任務 */}
             {peerTasks.length > 0 && (
               <div>
-                <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <h2 className="text-lg font-semibold text-gray-100 mb-4 flex items-center gap-2">
                   <span>🤝</span>
                   <span>互評任務</span>
                 </h2>
@@ -231,11 +231,11 @@ export default function TasksPage() {
                     <Link
                       key={task.id}
                       href={`/evaluate/${task.session_id}/peer/${task.target_id}`}
-                      className="block bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-5 border-2 border-emerald-200 hover:border-emerald-400 hover:shadow-lg transition-all active:scale-[0.98]"
+                      className="block card-tech p-5 hover:border-gold/50 transition-all active:scale-[0.98]"
                     >
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex-1">
-                          <h3 className="font-bold text-gray-900 mb-1 text-lg">
+                          <h3 className="font-bold text-gray-100 mb-1 text-lg">
                             {task.target_name}
                           </h3>
                           <div className="flex items-center gap-2 flex-wrap">
@@ -246,7 +246,7 @@ export default function TasksPage() {
                                 ? "內場"
                                 : task.target_department}
                             </Badge>
-                            <span className="text-xs text-gray-500">{task.session_name}</span>
+                            <span className="text-xs text-gray-400">{task.session_name}</span>
                           </div>
                         </div>
                         <Badge variant="primary" size="sm">
@@ -265,7 +265,7 @@ export default function TasksPage() {
             {/* 已完成任務 */}
             {completedTasks.length > 0 && (
               <div>
-                <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <h2 className="text-lg font-semibold text-gray-100 mb-4 flex items-center gap-2">
                   <span>✅</span>
                   <span>已完成</span>
                 </h2>
@@ -273,11 +273,11 @@ export default function TasksPage() {
                   {completedTasks.map((task) => (
                     <div
                       key={task.id}
-                      className="bg-gray-50 rounded-lg p-4 border border-gray-200 opacity-75"
+                      className="card-tech p-4 opacity-60"
                     >
                       <div className="flex items-center justify-between">
                         <div>
-                          <h3 className="font-medium text-gray-700 text-sm">
+                          <h3 className="font-medium text-gray-300 text-sm">
                             {task.is_self ? task.session_name : task.target_name}
                           </h3>
                           <p className="text-xs text-gray-500 mt-1">
@@ -294,10 +294,10 @@ export default function TasksPage() {
 
             {/* 空狀態 */}
             {selfTasks.length === 0 && peerTasks.length === 0 && completedTasks.length === 0 && (
-              <div className="bg-white rounded-xl p-8 text-center border border-gray-200">
+              <div className="card-tech p-8 text-center">
                 <div className="text-4xl mb-3">🎉</div>
-                <p className="text-gray-700 font-medium mb-1">目前沒有評鑑任務</p>
-                <p className="text-sm text-gray-500">
+                <p className="text-gray-300 font-medium mb-1">目前沒有評鑑任務</p>
+                <p className="text-sm text-gray-400">
                   所有任務都已完成，或目前沒有進行中的評鑑場次
                 </p>
               </div>

@@ -3,26 +3,40 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: #0B0F14;
+  --foreground: #F3F4F6;
+  --surface: #111827;
+  --card: #1F2937;
+  --border: #374151;
+  --gold: #C9A24D;
+  --gold-light: #D4AF37;
+  --gold-dark: #B8941F;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+  
+  /* 科技感卡片樣式 */
+  .card-tech {
+    @apply bg-dark-card border border-dark-border rounded-xl shadow-lg;
+  }
+  
+  /* 主要按鈕樣式 */
+  .btn-primary-tech {
+    @apply bg-dark-base border border-gold text-gold font-medium rounded-lg hover:bg-dark-surface hover:border-gold-light transition-all;
+  }
+  
+  /* 次要按鈕樣式 */
+  .btn-secondary-tech {
+    @apply bg-dark-surface border border-dark-border text-gray-300 font-medium rounded-lg hover:bg-dark-card transition-all;
   }
 }
 

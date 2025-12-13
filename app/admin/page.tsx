@@ -54,12 +54,12 @@ export default function AdminPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "open":
-        return "bg-green-100 text-green-800";
+        return "bg-dark-card text-gold border border-gold/50";
       case "closed":
-        return "bg-gray-100 text-gray-800";
+        return "bg-dark-surface text-gray-400 border border-dark-border";
       case "draft":
       default:
-        return "bg-yellow-100 text-yellow-800";
+        return "bg-dark-card text-gold-dark border border-gold-dark/30";
     }
   };
 
@@ -89,7 +89,7 @@ export default function AdminPage() {
       {loading || loadingSessions ? (
         <MobileLayout title="管理後台">
           <div className="flex items-center justify-center min-h-[60vh]">
-            <div className="text-gray-500">載入中...</div>
+            <div className="text-gray-400">載入中...</div>
           </div>
         </MobileLayout>
       ) : (
@@ -99,13 +99,13 @@ export default function AdminPage() {
             <div className="grid grid-cols-2 gap-3">
               <Link
                 href="/admin/sessions/new"
-                className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-center py-3 px-4 rounded-xl hover:shadow-lg transition-all font-medium"
+                className="btn-primary-tech text-center py-3 px-4"
               >
                 + 建立場次
               </Link>
               <Link
                 href="/admin/employees"
-                className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-center py-3 px-4 rounded-xl hover:shadow-lg transition-all font-medium"
+                className="btn-primary-tech text-center py-3 px-4"
               >
                 👥 員工進度
               </Link>
@@ -117,13 +117,13 @@ export default function AdminPage() {
               </Link>
               <Link
                 href="/admin/rewards"
-                className="bg-gradient-to-r from-amber-500 to-orange-600 text-white text-center py-3 px-4 rounded-xl hover:shadow-lg transition-all font-medium"
+                className="btn-primary-tech text-center py-3 px-4"
               >
                 🎁 積分管理
               </Link>
               <Link
                 href="/admin/debug-tools"
-                className="bg-gradient-to-r from-purple-500 to-pink-600 text-white text-center py-3 px-4 rounded-xl hover:shadow-lg transition-all font-medium flex items-center justify-center gap-1"
+                className="btn-primary-tech text-center py-3 px-4 flex items-center justify-center gap-1"
               >
                 <span>🔧</span>
                 <span>測試工具</span>
@@ -133,13 +133,13 @@ export default function AdminPage() {
             
             {/* 修復管理員帳號按鈕（如果沒有管理員權限時顯示） */}
             {!isAdmin && (
-              <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
-                <p className="text-sm text-yellow-800 mb-3">
+              <div className="card-tech p-4 border-gold-dark/30">
+                <p className="text-sm text-gray-300 mb-3">
                   ⚠️ 您目前沒有管理員權限。點擊下方按鈕自動修復：
                 </p>
                 <Link
                   href="/admin/fix-admin"
-                  className="block w-full bg-yellow-600 text-white text-center py-3 px-4 rounded-lg hover:bg-yellow-700 transition-colors font-medium"
+                  className="btn-primary-tech block w-full text-center py-3 px-4"
                 >
                   🔧 修復管理員帳號
                 </Link>
@@ -148,17 +148,17 @@ export default function AdminPage() {
             
             {/* 權限提示 */}
             {!isAdmin && (
-              <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
-                <p className="text-sm text-yellow-800">
-                  ⚠️ 您目前沒有管理員權限。如需訪問測試工具，請聯繫系統管理員將您的帳號設為 <code className="bg-yellow-100 px-1 rounded">manager</code> 或 <code className="bg-yellow-100 px-1 rounded">owner</code>。
+              <div className="card-tech p-4 border-gold-dark/30">
+                <p className="text-sm text-gray-300">
+                  ⚠️ 您目前沒有管理員權限。如需訪問測試工具，請聯繫系統管理員將您的帳號設為 <code className="bg-dark-surface text-gold px-1 rounded">manager</code> 或 <code className="bg-dark-surface text-gold px-1 rounded">owner</code>。
                 </p>
               </div>
             )}
 
             {/* 場次列表 */}
             {sessions.length === 0 ? (
-              <div className="bg-white rounded-lg shadow-sm p-6 text-center">
-                <p className="text-gray-500">目前沒有評鑑場次</p>
+              <div className="card-tech p-6 text-center">
+                <p className="text-gray-400">目前沒有評鑑場次</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -166,19 +166,19 @@ export default function AdminPage() {
                   <Link
                     key={session.id}
                     href={`/admin/sessions/${session.id}`}
-                    className="block bg-white rounded-lg shadow-sm p-4 border border-gray-200 hover:border-blue-300 hover:shadow transition-all"
+                    className="block card-tech p-4 hover:border-gold/50 transition-all"
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900 mb-1">{session.name}</h3>
+                        <h3 className="font-semibold text-gray-100 mb-1">{session.name}</h3>
                         {(session.start_at || session.end_at) && (
-                          <p className="text-sm text-gray-500">
+                          <p className="text-sm text-gray-400">
                             {formatDate(session.start_at)} ~ {formatDate(session.end_at)}
                           </p>
                         )}
                       </div>
                       <span
-                        className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(
+                        className={`px-2 py-1 rounded text-xs font-medium border ${getStatusColor(
                           session.status
                         )}`}
                       >
@@ -189,15 +189,15 @@ export default function AdminPage() {
                     {/* 完成度 */}
                     <div className="mt-3">
                       <div className="flex items-center justify-between text-sm mb-1">
-                        <span className="text-gray-600">完成進度</span>
-                        <span className="text-gray-900 font-medium">
+                        <span className="text-gray-400">完成進度</span>
+                        <span className="text-gray-200 font-medium">
                           {session.completion.completed} / {session.completion.total} (
                           {session.completion.percentage}%)
                         </span>
                       </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="w-full bg-dark-surface rounded-full h-2 border border-dark-border">
                         <div
-                          className="bg-blue-600 h-2 rounded-full transition-all"
+                          className="bg-gradient-to-r from-gold-dark to-gold h-2 rounded-full transition-all"
                           style={{ width: `${session.completion.percentage}%` }}
                         />
                       </div>

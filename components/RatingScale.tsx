@@ -17,18 +17,18 @@ export default function RatingScale({
 }: RatingScaleProps) {
   const emojis = ["😞", "😐", "🙂", "😊", "🤩"];
   const colors = [
-    "bg-red-100 hover:bg-red-200 border-red-300",
-    "bg-orange-100 hover:bg-orange-200 border-orange-300",
-    "bg-yellow-100 hover:bg-yellow-200 border-yellow-300",
-    "bg-emerald-100 hover:bg-emerald-200 border-emerald-300",
-    "bg-green-100 hover:bg-green-200 border-green-300",
+    "bg-dark-surface hover:bg-dark-card border-dark-border text-gray-400",
+    "bg-dark-surface hover:bg-dark-card border-dark-border text-gray-400",
+    "bg-dark-surface hover:bg-dark-card border-dark-border text-gray-400",
+    "bg-dark-surface hover:bg-dark-card border-dark-border text-gray-400",
+    "bg-dark-surface hover:bg-dark-card border-dark-border text-gray-400",
   ];
   const activeColors = [
-    "bg-red-500 text-white border-red-600",
-    "bg-orange-500 text-white border-orange-600",
-    "bg-yellow-500 text-white border-yellow-600",
-    "bg-emerald-500 text-white border-emerald-600",
-    "bg-green-500 text-white border-green-600",
+    "bg-dark-card text-gold border-gold shadow-lg",
+    "bg-dark-card text-gold border-gold shadow-lg",
+    "bg-dark-card text-gold border-gold shadow-lg",
+    "bg-dark-card text-gold border-gold shadow-lg",
+    "bg-dark-card text-gold border-gold shadow-lg",
   ];
 
   return (
@@ -52,7 +52,7 @@ export default function RatingScale({
       </div>
       {value && (
         <div className="text-center">
-          <p className="text-sm font-medium text-gray-700">{labels[value - 1]}</p>
+          <p className="text-sm font-medium text-gray-300">{labels[value - 1]}</p>
         </div>
       )}
     </div>
