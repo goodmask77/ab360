@@ -110,6 +110,12 @@ export default function AdminPage() {
                 👥 員工進度
               </Link>
               <Link
+                href="/admin/employees/manage"
+                className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-center py-3 px-4 rounded-xl hover:shadow-lg transition-all font-medium"
+              >
+                👤 員工管理
+              </Link>
+              <Link
                 href="/admin/rewards"
                 className="bg-gradient-to-r from-amber-500 to-orange-600 text-white text-center py-3 px-4 rounded-xl hover:shadow-lg transition-all font-medium"
               >
