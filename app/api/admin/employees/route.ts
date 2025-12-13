@@ -218,6 +218,51 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
+    // 在刪除員工前，先刪除所有相關的 evaluation_records
+    // 這包括該員工作為 evaluator 或 target 的所有記錄
+    const { error: deleteRecordsError } = await supabase
+      .from("evaluation_records")
+      .delete()
+      .or(`evaluator_id.eq.${id},target_id.eq.${id}`);
+
+    if (deleteRecordsError) {
+      console.error("[API ERROR] delete evaluation records:", deleteRecordsError);
+      // 繼續執行，因為可能沒有相關記錄
+    }
+
+    // 刪除相關的 evaluation_assignments（如果存在）
+    const { error: deleteAssignmentsError } = await supabase
+      .from("evaluation_assignments")
+      .delete()
+      .or(`evaluator_id.eq.${id},target_id.eq.${id}`);
+
+    if (deleteAssignmentsError) {
+      console.error("[API ERROR] delete evaluation assignments:", deleteAssignmentsError);
+      // 繼續執行
+    }
+
+    // 刪除相關的 ai_feedback（如果存在）
+    const { error: deleteAIFeedbackError } = await supabase
+      .from("ai_feedback")
+      .delete()
+      .eq("target_id", id);
+
+    if (deleteAIFeedbackError) {
+      console.error("[API ERROR] delete ai feedback:", deleteAIFeedbackError);
+      // 繼續執行
+    }
+
+    // 刪除相關的 reward_points_ledger（如果存在）
+    const { error: deletePointsError } = await supabase
+      .from("reward_points_ledger")
+      .delete()
+      .or(`giver_id.eq.${id},receiver_id.eq.${id}`);
+
+    if (deletePointsError) {
+      console.error("[API ERROR] delete reward points:", deletePointsError);
+      // 繼續執行
+    }
+
     // 刪除員工資料
     const { error: deleteEmployeeError } = await supabase
       .from("employees")
