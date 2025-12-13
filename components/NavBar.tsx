@@ -34,7 +34,7 @@ export default function NavBar() {
                     {employee.role === "owner"
                       ? "管理員"
                       : employee.role === "duty"
-                      ? "管理員"
+                      ? "Duty"
                       : "夥伴"}
                   </span>
                 )}

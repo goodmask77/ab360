@@ -29,7 +29,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     if (!authLoading) {
-      if (!employee || (employee.role !== "owner")) {
+      if (!employee || employee.role !== "owner") {
         router.push("/dashboard");
         return;
       }
@@ -45,13 +45,10 @@ export default function AdminDashboard() {
         .select("*")
         .order("created_at", { ascending: false });
 
-      if (error) {
-        console.error("[API ERROR] load sessions:", error);
-        throw error;
-      }
+      if (error) throw error;
       setSessions(data || []);
     } catch (error) {
-      console.error("[API ERROR] load sessions:", error);
+      console.error("載入場次失敗:", error);
     } finally {
       setLoading(false);
     }
@@ -60,22 +57,16 @@ export default function AdminDashboard() {
   const handleCreateSession = async () => {
     try {
       const supabase = createBrowserSupabaseClient();
-      const { error } = await supabase
-        .from("evaluation_sessions")
-        .insert([
-          {
-            name: newSession.name,
-            start_at: newSession.start_at || null,
-            end_at: newSession.end_at || null,
-            status: newSession.status,
-          },
-        ])
-        .select();
+      const { error } = await supabase.from("evaluation_sessions").insert([
+        {
+          name: newSession.name,
+          start_at: newSession.start_at || null,
+          end_at: newSession.end_at || null,
+          status: newSession.status,
+        },
+      ]);
 
-      if (error) {
-        console.error("[API ERROR] create session:", error);
-        throw error;
-      }
+      if (error) throw error;
 
       setShowCreateModal(false);
       setNewSession({ name: "", start_at: "", end_at: "", status: "draft" });
