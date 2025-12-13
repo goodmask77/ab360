@@ -126,9 +126,29 @@ export default function HomePage() {
           </div>
         </MobileLayout>
       ) : !employee ? (
-        <MobileLayout>
-          <div className="flex items-center justify-center min-h-[60vh]">
-            <div className="text-gray-500">無法載入員工資料</div>
+        <MobileLayout title="無法載入員工資料" showHomeButton={false}>
+          <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+            <div className="text-red-600 font-semibold text-lg">無法載入員工資料</div>
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 max-w-md">
+              <p className="text-sm text-gray-700 mb-2">
+                <strong>可能的原因：</strong>
+              </p>
+              <ul className="list-disc list-inside text-sm text-gray-600 space-y-1 mb-4">
+                <li>您的帳號尚未建立員工資料</li>
+                <li>請訪問 <code className="bg-gray-100 px-1 rounded">/admin/setup-accounts</code> 來設定帳號權限</li>
+              </ul>
+              <div className="mt-4 pt-4 border-t border-yellow-200">
+                <p className="text-xs text-gray-600">
+                  如果您是 <code className="bg-gray-100 px-1 rounded">gooodmask77@gmail.com</code>，請先使用該功能設定帳號權限。
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/admin/setup-accounts"
+              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            >
+              前往設定帳號權限
+            </Link>
           </div>
         </MobileLayout>
       ) : (
