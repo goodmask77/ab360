@@ -19,7 +19,7 @@ interface SessionCard {
 }
 
 export default function HomePage() {
-  const { employee, loading } = useSession();
+  const { employee, loading, isAdmin } = useSession();
   const router = useRouter();
   const [sessions, setSessions] = useState<SessionCard[]>([]);
   const [loadingSessions, setLoadingSessions] = useState(true);
@@ -234,40 +234,73 @@ export default function HomePage() {
               )}
             </div>
 
+            {/* 管理員專屬區塊 */}
+            {employee?.role === "owner" && (
+              <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-xl p-4 border-2 border-orange-300">
+                <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                  <span>⚙️</span>
+                  <span>管理後台</span>
+                </h3>
+                <div className="grid grid-cols-2 gap-3">
+                  <Link
+                    href="/admin"
+                    className="bg-white rounded-lg p-3 text-center border-2 border-orange-200 hover:border-orange-400 hover:shadow-md transition-all"
+                  >
+                    <div className="text-xl mb-1">🏢</div>
+                    <div className="text-xs text-gray-600">管理後台</div>
+                    <div className="text-sm font-semibold text-gray-900">進入管理</div>
+                  </Link>
+                  <Link
+                    href="/admin/sessions/new"
+                    className="bg-white rounded-lg p-3 text-center border-2 border-orange-200 hover:border-orange-400 hover:shadow-md transition-all"
+                  >
+                    <div className="text-xl mb-1">➕</div>
+                    <div className="text-xs text-gray-600">建立場次</div>
+                    <div className="text-sm font-semibold text-gray-900">新增評鑑</div>
+                  </Link>
+                </div>
+              </div>
+            )}
+
             {/* 快速連結 */}
-            <div className="grid grid-cols-2 gap-4">
-              <Link
-                href="/tasks"
-                className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 text-center border-2 border-blue-200 hover:border-blue-400 hover:shadow-lg transition-all active:scale-[0.98]"
-              >
-                <div className="text-2xl mb-2">📝</div>
-                <div className="text-sm text-gray-600 mb-1">我的任務</div>
-                <div className="text-base font-semibold text-gray-900">查看任務</div>
-              </Link>
-              <Link
-                href="/me"
-                className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-4 text-center border-2 border-emerald-200 hover:border-emerald-400 hover:shadow-lg transition-all active:scale-[0.98]"
-              >
-                <div className="text-2xl mb-2">📊</div>
-                <div className="text-sm text-gray-600 mb-1">我的回饋</div>
-                <div className="text-base font-semibold text-gray-900">查看回饋</div>
-              </Link>
-              <Link
-                href="/rewards"
-                className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-4 text-center border-2 border-amber-200 hover:border-amber-400 hover:shadow-lg transition-all active:scale-[0.98]"
-              >
-                <div className="text-2xl mb-2">🪙</div>
-                <div className="text-sm text-gray-600 mb-1">我的積分</div>
-                <div className="text-base font-semibold text-gray-900">積分系統</div>
-              </Link>
-              <Link
-                href="/rewards/leaderboard"
-                className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-4 text-center border-2 border-purple-200 hover:border-purple-400 hover:shadow-lg transition-all active:scale-[0.98]"
-              >
-                <div className="text-2xl mb-2">🏆</div>
-                <div className="text-sm text-gray-600 mb-1">排行榜</div>
-                <div className="text-base font-semibold text-gray-900">查看排名</div>
-              </Link>
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                {employee?.role === "owner" ? "一般功能" : "快速連結"}
+              </h2>
+              <div className="grid grid-cols-2 gap-4">
+                <Link
+                  href="/tasks"
+                  className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 text-center border-2 border-blue-200 hover:border-blue-400 hover:shadow-lg transition-all active:scale-[0.98]"
+                >
+                  <div className="text-2xl mb-2">📝</div>
+                  <div className="text-sm text-gray-600 mb-1">我的任務</div>
+                  <div className="text-base font-semibold text-gray-900">查看任務</div>
+                </Link>
+                <Link
+                  href="/me"
+                  className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-4 text-center border-2 border-emerald-200 hover:border-emerald-400 hover:shadow-lg transition-all active:scale-[0.98]"
+                >
+                  <div className="text-2xl mb-2">📊</div>
+                  <div className="text-sm text-gray-600 mb-1">我的回饋</div>
+                  <div className="text-base font-semibold text-gray-900">查看回饋</div>
+                </Link>
+                <Link
+                  href="/rewards"
+                  className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-4 text-center border-2 border-amber-200 hover:border-amber-400 hover:shadow-lg transition-all active:scale-[0.98]"
+                >
+                  <div className="text-2xl mb-2">🪙</div>
+                  <div className="text-sm text-gray-600 mb-1">我的積分</div>
+                  <div className="text-base font-semibold text-gray-900">積分系統</div>
+                </Link>
+                <Link
+                  href="/rewards/leaderboard"
+                  className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-4 text-center border-2 border-purple-200 hover:border-purple-400 hover:shadow-lg transition-all active:scale-[0.98]"
+                >
+                  <div className="text-2xl mb-2">🏆</div>
+                  <div className="text-sm text-gray-600 mb-1">排行榜</div>
+                  <div className="text-base font-semibold text-gray-900">查看排名</div>
+                </Link>
+              </div>
             </div>
           </div>
         </MobileLayout>
