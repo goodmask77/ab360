@@ -1,5 +1,5 @@
-import { createServerSupabaseClient } from "@/lib/supabaseClient";
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 import {
   generateRandomName,
   generateRandomEmail,
@@ -15,39 +15,73 @@ import {
  */
 export async function POST(req: NextRequest) {
   try {
-    const supabase = createServerSupabaseClient();
+    // 使用 service_role key 來繞過 RLS 政策
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-    // 1. 建立 50 位虛擬員工（包含不同角色）
-    const employees: Array<{
-      name: string;
-      email: string;
-      department: string;
-      role: string;
-    }> = [];
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error("[API ERROR] Missing Supabase environment variables");
+      return NextResponse.json(
+        { error: "伺服器設定錯誤" },
+        { status: 500 }
+      );
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    });
+
+    // 1. 建立 50 位虛擬員工（包含不同角色和 Auth 使用者）
+    const createdEmployees: Array<{ id: string; name: string; department: string; role: string }> = [];
 
     // 生成 50 位員工
     for (let i = 1; i <= 50; i++) {
       let role = "staff";
       if (i === 1) role = "owner"; // 第1位是老闆
-      else if (i <= 3) role = "manager"; // 第2-3位是經理
-      else if (i <= 5) role = "manager"; // 第4-5位也是經理
+      else if (i <= 5) role = "duty"; // 第2-5位是 Duty
 
-      employees.push({
-        name: generateRandomName(),
-        email: generateRandomEmail(i),
-        department: Math.random() > 0.5 ? "front" : "back",
-        role,
+      const name = generateRandomName();
+      const email = generateRandomEmail(i);
+      const department = Math.random() > 0.5 ? "front" : "back";
+
+      // 先建立 Auth 使用者
+      const { data: newUser, error: createUserError } = await supabase.auth.admin.createUser({
+        email,
+        email_confirm: true,
+        user_metadata: {},
       });
-    }
 
-    const { data: createdEmployees, error: employeesError } = await supabase
-      .from("employees")
-      .insert(employees)
-      .select("id, name, department, role");
+      if (createUserError || !newUser?.user) {
+        console.error(`[API ERROR] create auth user ${email}:`, createUserError);
+        continue; // 跳過這個員工，繼續下一個
+      }
 
-    if (employeesError) {
-      console.error("[API ERROR] create employees:", employeesError);
-      throw employeesError;
+      // 建立員工資料
+      const { data: employee, error: createEmployeeError } = await supabase
+        .from("employees")
+        .insert({
+          auth_user_id: newUser.user.id,
+          name,
+          email,
+          department,
+          role,
+        })
+        .select("id, name, department, role")
+        .single();
+
+      if (createEmployeeError) {
+        console.error(`[API ERROR] create employee ${email}:`, createEmployeeError);
+        // 如果建立員工失敗，刪除已建立的 Auth 使用者
+        await supabase.auth.admin.deleteUser(newUser.user.id);
+        continue;
+      }
+
+      if (employee) {
+        createdEmployees.push(employee);
+      }
     }
 
     if (createdEmployees.length === 0) {
