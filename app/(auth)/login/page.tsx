@@ -12,10 +12,12 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const hasRedirectedRef = useRef(false);
 
   // 如果已登入，導向首頁（使用 replace 避免歷史記錄堆疊）
   useEffect(() => {
-    if (!authLoading && user) {
+    if (!authLoading && user && !hasRedirectedRef.current) {
+      hasRedirectedRef.current = true;
       router.replace("/home");
     }
   }, [user, authLoading, router]);
@@ -37,7 +39,10 @@ export default function LoginPage() {
         await new Promise((resolve) => setTimeout(resolve, 300));
         
         // 重導向到首頁
-        router.replace("/home");
+        if (!hasRedirectedRef.current) {
+          hasRedirectedRef.current = true;
+          router.replace("/home");
+        }
       }
     } catch (err: any) {
       console.error("登入錯誤:", err);

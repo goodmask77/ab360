@@ -36,7 +36,9 @@ export async function signIn(email: string) {
     
     if (result.useMagicLink && result.actionLink) {
       // 如果使用 magic link，直接導向
-      window.location.href = result.actionLink;
+      if (typeof window !== "undefined") {
+        window.location.href = result.actionLink;
+      }
       return {
         user: null,
         session: null,
