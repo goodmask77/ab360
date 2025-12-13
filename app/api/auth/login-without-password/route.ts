@@ -64,9 +64,22 @@ export async function POST(request: NextRequest) {
     }
 
     // 使用 admin API 建立 magic link，然後從中提取 token
+    // 取得當前請求的 origin，用於設定正確的重定向 URL
+    const requestOrigin = request.headers.get("origin") || 
+                         request.headers.get("referer")?.split("/").slice(0, 3).join("/") || 
+                         "";
+    const redirectTo = requestOrigin 
+      ? `${requestOrigin}/auth/callback`
+      : process.env.NEXT_PUBLIC_SITE_URL 
+        ? `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`
+        : undefined;
+
     const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
       type: "magiclink",
       email,
+      options: redirectTo ? {
+        redirectTo,
+      } : undefined,
     });
 
     if (linkError || !linkData) {
