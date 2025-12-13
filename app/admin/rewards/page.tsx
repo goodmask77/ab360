@@ -168,7 +168,7 @@ export default function AdminRewardsPage() {
                                 ? "info"
                                 : entry.department === "back"
                                 ? "primary"
-                                : "default"
+                                : "secondary"
                             }
                             size="sm"
                           >
