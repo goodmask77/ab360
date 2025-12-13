@@ -69,7 +69,13 @@
      ```
      NEXT_PUBLIC_SUPABASE_URL=https://hhwkxjqjpnejozbytaow.supabase.co
      NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhod2t4anFqcG5lam96Ynl0YW93Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUyMTAxNDIsImV4cCI6MjA4MDc4NjE0Mn0.ict0qkGQBISO-x25uGE28KPEmqK0A6fsYgxIe72j7nU
+     SUPABASE_SERVICE_ROLE_KEY=你的_service_role_key
      ```
+   - **重要**：`SUPABASE_SERVICE_ROLE_KEY` 是機密資訊，用於伺服器端 API 操作（如登入功能）
+   - 取得方法：
+     1. 前往 Supabase Dashboard → Settings → API
+     2. 找到 **service_role** key（secret，不是 anon key）
+     3. 複製此 key 並設定到 Vercel 環境變數
    - 環境選擇：Production, Preview, Development（建議全選）
 
 2. **Git 連接** ✅
@@ -92,8 +98,9 @@
 
 ### 下一步行動
 1. ✅ 在 Vercel 設定 Supabase 環境變數（見上方）
+   - **必須設定** `SUPABASE_SERVICE_ROLE_KEY`，否則登入功能會失敗並顯示「伺服器設定錯誤」
 2. ✅ 等待 Vercel 自動部署完成
-3. ✅ 測試部署的網站功能
+3. ✅ 測試部署的網站功能，特別是登入功能
 
 ---
 

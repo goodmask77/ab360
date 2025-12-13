@@ -40,6 +40,7 @@
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 ```
 
 ### 取得 Supabase 環境變數
@@ -50,6 +51,9 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 4. 複製以下資訊：
    - **Project URL** → `NEXT_PUBLIC_SUPABASE_URL`
    - **anon public** key → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - **service_role** key (secret) → `SUPABASE_SERVICE_ROLE_KEY`
+     - ⚠️ **重要**：此 key 是機密資訊，用於伺服器端 API 操作（如登入功能）
+     - 不要將此 key 提交到 Git 或分享給他人
 
 ## 本機開發步驟
 
