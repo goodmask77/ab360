@@ -157,25 +157,6 @@ export default function HomePage() {
         <MobileLayout title="首頁">
 
           <div className="space-y-6">
-            {/* 使用者資訊 */}
-            <Card>
-              <div className="p-4">
-                <div className="text-sm text-text-secondary">歡迎回來</div>
-                <div className="text-lg font-semibold text-text-primary mt-1">
-                  {employee.name}
-                </div>
-                {employee.department && (
-                  <div className="text-sm text-text-secondary mt-1">
-                    {employee.department === "front"
-                      ? "外場"
-                      : employee.department === "back"
-                      ? "內場"
-                      : employee.department}
-                  </div>
-                )}
-              </div>
-            </Card>
-
             {/* 評鑑場次列表 */}
             <div>
               <h2 className="section-title">進行中的評鑑</h2>
