@@ -8,12 +8,14 @@ interface SessionSettingsTabProps {
   session: EvaluationSession;
   onUpdate: (updates: Partial<EvaluationSession>) => Promise<void>;
   onReload: () => Promise<void>;
+  onDelete: () => Promise<void>;
 }
 
 export default function SessionSettingsTab({
   session,
   onUpdate,
   onReload,
+  onDelete,
 }: SessionSettingsTabProps) {
   const router = useRouter();
   const sessionWithRewards = session as any;
@@ -64,6 +66,25 @@ export default function SessionSettingsTab({
       alert("狀態已更新");
     } catch (err: any) {
       alert("更新狀態失敗: " + err.message);
+    }
+  };
+
+  const handleDelete = async () => {
+    const confirmMessage = `確定要刪除場次「${session.name}」嗎？\n\n此操作將永久刪除：\n- 場次資訊\n- 所有評鑑記錄\n- 所有分配任務\n\n此操作無法復原！`;
+    
+    if (!confirm(confirmMessage)) {
+      return;
+    }
+
+    // 二次確認
+    if (!confirm("最後確認：確定要刪除此場次嗎？")) {
+      return;
+    }
+
+    try {
+      await onDelete();
+    } catch (err: any) {
+      alert("刪除場次失敗: " + err.message);
     }
   };
 
@@ -210,6 +231,20 @@ export default function SessionSettingsTab({
             )}
           </div>
         </div>
+      </div>
+
+      {/* 刪除場次 */}
+      <div className="bg-white rounded-lg shadow-sm p-4 border-t-4 border-red-500">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4 text-red-600">危險操作</h3>
+        <p className="text-sm text-gray-600 mb-4">
+          刪除此場次將永久移除所有相關資料，包括評鑑記錄、分配任務等。此操作無法復原。
+        </p>
+        <button
+          onClick={handleDelete}
+          className="w-full bg-red-600 text-white py-3 px-4 rounded-lg hover:bg-red-700 transition-colors font-medium"
+        >
+          刪除此場次
+        </button>
       </div>
     </div>
   );

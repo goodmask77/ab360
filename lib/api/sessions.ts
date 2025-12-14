@@ -119,6 +119,22 @@ export async function updateSession(
 }
 
 /**
+ * 刪除場次
+ */
+export async function deleteSession(id: string): Promise<void> {
+  const supabase = createBrowserSupabaseClient();
+  const { error } = await supabase
+    .from("evaluation_sessions")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    console.error("[API ERROR] delete session:", error);
+    throw error;
+  }
+}
+
+/**
  * 計算場次完成度
  */
 export async function getSessionCompletion(sessionId: string): Promise<{

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useSession } from "@/lib/hooks/useSession";
-import { getSessionById, updateSession, type EvaluationSession } from "@/lib/api/sessions";
+import { getSessionById, updateSession, deleteSession, type EvaluationSession } from "@/lib/api/sessions";
 import MobileLayout from "@/components/MobileLayout";
 import Tabs from "@/components/Tabs";
 import { AuthGuard } from "@/lib/auth-guard";
@@ -52,6 +52,17 @@ export default function SessionManagePage() {
     }
   };
 
+  const handleDeleteSession = async () => {
+    try {
+      await deleteSession(sessionId);
+      alert("場次已刪除");
+      router.push("/admin");
+    } catch (error: any) {
+      console.error("[API ERROR] delete session:", error);
+      throw error;
+    }
+  };
+
   if (loading || authLoading) {
     return (
       <AuthGuard requireAuth={true} requireAdmin={true}>
@@ -89,6 +100,7 @@ export default function SessionManagePage() {
                   session={session}
                   onUpdate={handleUpdateSession}
                   onReload={loadSession}
+                  onDelete={handleDeleteSession}
                 />
               ),
             },
